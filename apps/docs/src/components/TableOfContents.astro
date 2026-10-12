@@ -1,0 +1,50 @@
+---
+import type { MarkdownHeading } from "astro";
+
+export interface Props {
+  headings: MarkdownHeading[];
+  maxDepth: number;
+}
+
+const { headings, maxDepth } = Astro.props;
+const items = headings.filter(heading => heading.depth >= 2 && heading.depth <= maxDepth);
+---
+
+{items.length >= 2 && (
+  <nav id="docs-toc" aria-label="On this page" class="hidden xl:block w-[240px] flex-shrink-0 py-12 pr-6">
+    <div class="sticky top-12">
+      <h2 class="text-sm font-semibold mb-3">On this page</h2>
+      <ul class="text-sm text-gray-400 border-l border-gray-200">
+        {items.map(heading => (
+          <li>
+            <a
+              href={`#${heading.slug}`}
+              data-toc-link={heading.slug}
+              class:list={["block py-1 -ml-px border-l border-transparent hover:text-black data-[active]:border-black data-[active]:text-black", heading.depth === 2 ? "pl-4" : "pl-7"]}>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+)}
+
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]")];
+  const headings = links
+    .map(link => document.getElementById(link.dataset.tocLink!))
+    .filter((heading): heading is HTMLElement => heading !== null);
+
+  function markActive() {
+    const current = headings.filter(heading => heading.getBoundingClientRect().top < 120).at(-1) ?? headings[0];
+    links.forEach(link => {
+      link.toggleAttribute("data-active", link.dataset.tocLink === current?.id);
+    });
+  }
+
+  if (links.length) {
+    markActive();
+    window.addEventListener("scroll", markActive, { passive: true });
+  }
+</script>

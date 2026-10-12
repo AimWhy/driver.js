@@ -4,18 +4,21 @@ import { DocsHeader } from "../components/DocsHeader";
 import Container from "../components/Container.astro";
 import { getFormattedStars } from "../lib/github";
 import Sidebar from "../components/Sidebar.astro";
+import TableOfContents from "../components/TableOfContents.astro";
 import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
 import { getAllGuides } from "../lib/guide";
 
 type GuideType = CollectionEntry<"guides">;
 
 export interface Props {
   guide: GuideType;
+  headings: MarkdownHeading[];
 }
 
 const groupedGuides = await getAllGuides();
 
-const { guide } = Astro.props;
+const { guide, headings } = Astro.props;
 const { groupTitle, sort, title, description } = guide.data;
 
 const metaDescription =
@@ -36,5 +39,6 @@ const metaDescription =
       ]}>
       <slot />
     </div>
+    <TableOfContents headings={headings} maxDepth={guide.id === "changelog" ? 2 : 3} />
   </div>
 </BaseLayout>

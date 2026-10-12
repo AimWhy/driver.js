@@ -1,20 +1,23 @@
 ---
-title: "Styling Popover"
-description: "Style the Driver.js popover with custom classes or the onPopoverRender callback. Override the default styles or fully customize the popover DOM per step."
+title: "Styling"
+description: "Style Driver.js popovers with your own CSS class or the onPopoverRender hook, and change the overlay color and opacity to match your product's look."
 groupTitle: "Examples"
-sort: 2
+sort: 7
 ---
 
 import { CodeSample } from "../../components/CodeSample.tsx";
+
+## Popover
 
 You can either use the default class names and override the styles or you can pass a custom class name to the `popoverClass` option either globally or per step.
 
 Alternatively, if want to modify the Popover DOM, you can use the `onPopoverRender` callback to get the popover DOM element and do whatever you want with it before popover is rendered.
 
-We have added a few examples below but have a look at the [theming section](/docs/theming#styling-popover) for detailed guide including class names to target etc.
+Have a look at the [theming guide](/docs/theming#styling-popover) for a detailed guide, including the class names to target.
+
+### Using CSS
 
 <CodeSample
-  heading="Using CSS"
   buttonText={"Driver.js Website Theme"}
   config={{
     prevBtnText: '&larr; Previous',
@@ -138,72 +141,82 @@ Here is the CSS used for the above example:
 }
 ```
 
-<br/>
+### Using Hooks
 
-<CodeSample
-  heading="Using Hook to Modify"
-  buttonText={"Manipulating Popover DOM"}
-  config={{
-    prevBtnText: '&larr; Previous',
-    nextBtnText: 'Next &rarr;',
-    doneBtnText: 'Done',
-    showButtons: ['next', 'previous'],
-  }}
-  tour={[
-    {
-      element: '#demo-hook-theme',
+To change the popover's DOM, for example to add your own buttons, use the `onPopoverRender` hook. See [Custom Buttons](/docs/popover#custom-buttons) for an example.
+
+## Overlay
+
+You can customize the overlay opacity and color using `overlayOpacity` and `overlayColor` options to change the look of the overlay.
+
+> **Note:** In the examples below we have used `highlight` method to highlight the elements. The same configuration applies to the tour steps as well.
+
+### Overlay Color
+
+Here are some driver.js examples with different overlay colors.
+
+```js
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+const driverObj = driver({
+  overlayColor: 'red'
+});
+
+driverObj.highlight({
+  popover: {
+    title: 'Pass any RGB Color',
+    description: 'Here we have set the overlay color to be red. You can pass any RGB color to overlayColor option.'
+  }
+});
+```
+
+<div className='flex flex-col gap-1 -mt-5'>
+  <CodeSample
+    buttonText={"Red Color"}
+    config={{
+      overlayColor: 'red',
+      overlayOpacity: 0.3
+    }}
+    highlight={{
       popover: {
-        align: 'start',
-        side: 'left',
-        title: 'More Control with Hooks',
-        description: 'You can use onPopoverRender hook to modify the popover DOM. Here we are adding a custom button to the popover which takes the user to the first step.'
+        title: 'Pass any RGB Color',
+        description: 'Here we have set the overlay color to be red. You can pass any RGB color to overlayColor option.',
       }
-    },
-    {
-      element: 'h1',
+    }}
+    id={"overlay-red"}
+    client:load
+  />
+
+  <CodeSample
+    buttonText={"Blue Color"}
+    config={{
+      overlayColor: 'blue',
+      overlayOpacity: 0.3
+    }}
+    highlight={{
       popover: {
-        align: 'start',
-        side: 'bottom',
-        title: 'Style However You Want',
-        description: 'You can use the default class names and override the styles or you can pass a custom class name to the popoverClass option either globally or per step.'
+        title: 'Pass any RGB Color',
+        description: 'Here we have set the overlay color to be blue. You can pass any RGB color to overlayColor option.',
       }
-    },
-    {
-      element: 'p a',
+    }}
+    id={"overlay-blue"}
+    client:load
+  />
+
+  <CodeSample
+    buttonText={"Yellow Color"}
+    config={{
+      overlayColor: 'yellow',
+      overlayOpacity: 0.3
+    }}
+    highlight={{
       popover: {
-        align: 'start',
-        side: 'left',
-        title: 'Style However You Want',
-        description: 'You can use the default class names and override the styles or you can pass a custom class name to the popoverClass option either globally or per step.'
+        title: 'Pass any RGB Color',
+        description: 'Here we have set the overlay color to be yellow. You can pass any RGB color to overlayColor option.',
       }
-    }
-  ]}
-  id={"demo-hook-theme"}
-  client:load
->
-  ```js
-  import { driver } from "driver.js";
-  import "driver.js/dist/driver.css";
-
-  const driverObj = driver({
-    // Get full control over the popover rendering.
-    // Here we are adding a custom button that takes
-    // the user to the first step.
-    onPopoverRender: (popover, { config, state }) => {
-      const firstButton = document.createElement("button");
-      firstButton.className = "driver-popover-footer-btn";
-      firstButton.innerText = "Go to First";
-      popover.footerButtons.appendChild(firstButton);
-
-      firstButton.addEventListener("click", () => {
-        driverObj.drive(0);
-      });
-    },
-    steps: [
-      // ..
-    ]
-  });
-
-  driverObj.drive();
-  ```
-</CodeSample>
+    }}
+    id={"overlay-yellow"}
+    client:load
+  />
+</div>

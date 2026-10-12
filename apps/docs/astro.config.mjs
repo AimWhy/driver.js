@@ -22,6 +22,22 @@ export default defineConfig({
   build: {
     format: "file",
   },
+  // Example pages that were merged into grouped pages.
+  redirects: {
+    "/docs/animated-tour": "/docs/tour-basics#animated-tour",
+    "/docs/static-tour": "/docs/tour-basics#static-tour",
+    "/docs/tour-progress": "/docs/tour-basics#tour-progress",
+    "/docs/interactive-tour": "/docs/interactive-tours",
+    "/docs/async-tour": "/docs/interactive-tours#async-steps",
+    "/docs/multi-page-tour": "/docs/interactive-tours#multi-page-tours",
+    "/docs/confirm-on-exit": "/docs/ending-a-tour#confirm-on-exit",
+    "/docs/prevent-destroy": "/docs/ending-a-tour#prevent-exit",
+    "/docs/popover-position": "/docs/popover#position",
+    "/docs/buttons": "/docs/popover#buttons",
+    "/docs/styling-popover": "/docs/styling#popover",
+    "/docs/styling-overlay": "/docs/styling#overlay",
+    "/docs/styling-hints": "/docs/hints#styling",
+  },
   markdown: {
     // Use the pure-JS unified/remark processor instead of Astro 7's default
     // native Sätteri engine, whose prebuilt binary needs a newer glibc than
