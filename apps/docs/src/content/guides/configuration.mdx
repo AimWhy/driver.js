@@ -148,7 +148,7 @@ type Config = {
   onDeselected?: (
     element?: Element,
     step: DriveStep,
-    options: { config: Config; state: State; driver: Driver; index: number | undefined }
+    options: { config: Config; state: State; driver: Driver; index: number | undefined; reason?: DestroyReason }
   ) => void;
 
   // Hooks to run before and after the driver
@@ -160,15 +160,25 @@ type Config = {
   //   - options.state: The current state of the driver
   //   - options.driver: Current driver object
   //   - options.index: Index of the currently active step
+  //   - options.reason: Why the tour is ending
+  //       "done"     moved past the last step
+  //       "close"    the close button
+  //       "escape"   the escape key
+  //       "overlay"  a click on the overlay
+  //       "replaced" another driver instance started
+  //       "api"      destroy() or navigation from your own code
+  //     A destroy() you call from a hook (e.g. confirming in
+  //     onDestroyStarted) keeps the reason of the action that
+  //     started it. onDeselected also gets it when it runs on destroy.
   onDestroyStarted?: (
     element?: Element,
     step: DriveStep,
-    options: { config: Config; state: State; driver: Driver; index: number | undefined }
+    options: { config: Config; state: State; driver: Driver; index: number | undefined; reason: DestroyReason }
   ) => void;
   onDestroyed?: (
     element?: Element,
     step: DriveStep,
-    options: { config: Config; state: State; driver: Driver; index: number | undefined }
+    options: { config: Config; state: State; driver: Driver; index: number | undefined; reason: DestroyReason }
   ) => void;
 
   // Hooks to run on button clicks. Each hook receives
@@ -214,6 +224,8 @@ type Config = {
 > `onDoneClick` lets you detect when the user finishes the tour by clicking the done button on the last step. When provided, it runs instead of `onNextClick` on the last step, and Driver.js won't destroy the tour automatically; you control teardown by calling `driverObj.destroy()` yourself. Like the other click hooks, it can be configured at the driver or step level.
 
 > `options.index`: Every hook receives the zero-based index of the currently active step in `options.index` (equivalent to `driverObj.getActiveIndex()`), or `undefined` when driving a single highlight rather than a `steps` array. Note that `index` always reflects the _active_ step, so inside `onDeselected` (which fires for the step being left during a transition) it points at the step being moved to, not the one being deselected.
+
+> `options.reason`: `onDestroyStarted`, `onDestroyed` and the `onDeselected` that runs when the tour ends receive why it ended: `"done"` (moved past the last step, including when the remaining steps are skipped as missing), `"close"`, `"escape"`, `"overlay"`, `"replaced"` (another driver instance started) or `"api"` (`destroy()`, or a `moveTo()` / `movePrevious()` that left the steps, from your own code). It is not set on the other hooks, or on the `onDeselected` that runs between steps. A `destroy()` you call from a hook (`onDestroyStarted`, `onCloseClick`, `onNextClick` / `onDoneClick` on the last step, an `overlayClickBehavior` function) keeps the reason of the user action that started it, so `onDestroyStarted: (el, step, { reason }) => { if (reason === "done" || confirm("Leave?")) driverObj.destroy(); }` only asks when the user leaves early. The type is exported as `DestroyReason`.
 
 ## Popover Configuration
 
@@ -359,10 +371,12 @@ type DriveStep = {
   //   - options.state: The current state of the driver
   //   - options.driver: Current driver object
   //   - options.index: Index of the currently active step
+  //   - options.reason: Why the tour ended, only on the
+  //     onDeselected that runs on destroy (see Driver Configuration)
   onDeselected?: (
     element?: Element,
     step: DriveStep,
-    options: { config: Config; state: State; driver: Driver; index: number | undefined }
+    options: { config: Config; state: State; driver: Driver; index: number | undefined; reason?: DestroyReason }
   ) => void;
   onHighlightStarted?: (
     element?: Element,

@@ -166,6 +166,10 @@ function resolveStepPopover(ctx: Context, element: Element, step: DriveStep): Po
     // The hooks are resolved when the button is clicked rather than up front,
     // so a setConfig() between render and click is still picked up.
     onNextClick: () => {
+      if (isDoneStep) {
+        ctx.setState("__destroyReason", "done");
+      }
+
       const onNextClick = resolveNextHook(ctx, step);
       if (onNextClick) {
         return onNextClick(element, step, ctx.getHookOpts());
@@ -184,6 +188,8 @@ function resolveStepPopover(ctx: Context, element: Element, step: DriveStep): Po
     },
 
     onCloseClick: () => {
+      ctx.setState("__destroyReason", "close");
+
       const onCloseClick = resolveCloseHook(ctx, step);
       if (onCloseClick) {
         return onCloseClick(element, step, ctx.getHookOpts());

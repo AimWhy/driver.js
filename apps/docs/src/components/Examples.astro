@@ -11,6 +11,7 @@ import { ExampleButton } from "./ExampleButton";
   <ExampleButton id="async-tour" text="Async Tour" />
   <ExampleButton id="no-element" text="No Element" />
   <ExampleButton id="confirm-on-exit" text="Confirm on Exit" />
+  <ExampleButton id="track-completion" text="Track Completion" />
   <ExampleButton id="show-progress" text="Show Progress" />
   <ExampleButton id="simple-element-highlight" text="Simple Highlight" />
   <ExampleButton id="simple-element-highlight-popover" text="Highlight with Popover" />
@@ -31,9 +32,42 @@ import { ExampleButton } from "./ExampleButton";
   import { mountDummyElement, removeDummyElement } from "../lib/dummyElement";
 
   function markDone(btn) {
+    btn.querySelector("[data-left-at]")?.remove();
     btn.classList.add("bg-gray-300", "hover:bg-gray-200", "line-through");
     btn.classList.remove("bg-transparent");
   }
+
+  function trackEnd(btn) {
+    return (element, step, { reason, index, config }) => {
+      if (index === undefined || reason === "done") {
+        markDone(btn);
+        return;
+      }
+
+      if (btn.classList.contains("line-through")) {
+        return;
+      }
+
+      const total = config.steps?.length ?? 0;
+      let badge = btn.querySelector("[data-left-at]");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.dataset.leftAt = "";
+        badge.className = "ml-2 rounded-md bg-black/10 px-1.5 py-0.5 text-sm font-normal no-underline";
+        btn.appendChild(badge);
+      }
+
+      badge.textContent = `left at ${index + 1}/${total}`;
+    };
+  }
+
+  const REASON_LABELS = {
+    close: "the close button",
+    escape: "the Escape key",
+    overlay: "a click on the overlay",
+    replaced: "another tour starting",
+    api: "code",
+  };
 
   const demoTourButton = document.querySelector("[data-demo-tour]");
   demoTourButton.addEventListener("click", () => {
@@ -154,9 +188,7 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyed: () => {
-        markDone(animatedTourBtn);
-      }
+      onDestroyed: trackEnd(animatedTourBtn)
     });
 
     driverObj.drive();
@@ -197,9 +229,7 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyed: () => {
-        markDone(staticTourBtn);
-      }
+      onDestroyed: trackEnd(staticTourBtn)
     });
 
     driverObj.drive();
@@ -254,9 +284,7 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyed: () => {
-        markDone(asyncTourBtn);
-      }
+      onDestroyed: trackEnd(asyncTourBtn)
     });
 
     driverObj.drive();
@@ -297,14 +325,12 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyStarted: () => {
-        if (!driverObj.hasNextStep() || confirm("Are you sure?")) {
+      onDestroyStarted: (element, step, { reason }) => {
+        if (reason === "done" || confirm("Are you sure?")) {
           driverObj.destroy();
         }
       },
-      onDestroyed: () => {
-        markDone(exitConfirm);
-      }
+      onDestroyed: trackEnd(exitConfirm)
     });
 
     driverObj.drive();
@@ -345,9 +371,7 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyed: () => {
-        markDone(showProgressBtn);
-      }
+      onDestroyed: trackEnd(showProgressBtn)
     });
 
     driverObj.drive();
@@ -357,9 +381,7 @@ import { ExampleButton } from "./ExampleButton";
   simpleHighlightBtn.addEventListener('click', () => {
     const driverObj = driver({
       popoverClass: 'driverjs-theme',
-      onDestroyed: () => {
-        markDone(simpleHighlightBtn);
-      }
+      onDestroyed: trackEnd(simpleHighlightBtn)
     });
 
     driverObj.highlight({
@@ -371,9 +393,7 @@ import { ExampleButton } from "./ExampleButton";
   simpleHighlightPopoverBtn.addEventListener('click', () => {
     const driverObj = driver({
       popoverClass: 'driverjs-theme',
-      onDestroyed: () => {
-        markDone(simpleHighlightPopoverBtn);
-      }
+      onDestroyed: trackEnd(simpleHighlightPopoverBtn)
     });
 
     driverObj.highlight({
@@ -390,9 +410,7 @@ import { ExampleButton } from "./ExampleButton";
   noElementbtn.addEventListener('click', () => {
     const driverObj = driver({
       popoverClass: 'driverjs-theme',
-      onDestroyed: () => {
-        markDone(noElementbtn);
-      }
+      onDestroyed: trackEnd(noElementbtn)
     });
 
     driverObj.highlight({
@@ -439,9 +457,7 @@ import { ExampleButton } from "./ExampleButton";
           }
         },
       ],
-      onDestroyed: () => {
-        markDone(preventCloseBtn);
-      }
+      onDestroyed: trackEnd(preventCloseBtn)
     });
 
     driverObj.drive();
@@ -452,9 +468,7 @@ import { ExampleButton } from "./ExampleButton";
     const driverObj = driver({
       overlayColor: 'red',
       overlayOpacity: 0.5,
-      onDestroyed: () => {
-        markDone(overlayColorBtn);
-      }
+      onDestroyed: trackEnd(overlayColorBtn)
     });
 
     driverObj.highlight({
@@ -470,9 +484,7 @@ import { ExampleButton } from "./ExampleButton";
   const popoverPositionBtn = document.getElementById('popover-position');
   popoverPositionBtn.addEventListener('click', () => {
     const driverObj = driver({
-      onDestroyed: () => {
-        markDone(popoverPositionBtn);
-      }
+      onDestroyed: trackEnd(popoverPositionBtn)
     });
 
     driverObj.highlight({
@@ -490,9 +502,7 @@ import { ExampleButton } from "./ExampleButton";
   customizingBtn.addEventListener('click', () => {
     const driverObj = driver({
       popoverClass: 'driverjs-theme',
-      onDestroyed: () => {
-        markDone(customizingBtn);
-      }
+      onDestroyed: trackEnd(customizingBtn)
     });
 
     driverObj.highlight({
@@ -510,9 +520,7 @@ import { ExampleButton } from "./ExampleButton";
   hooksEverythingBtn.addEventListener('click', () => {
     const driverObj = driver({
       popoverClass: 'driverjs-theme',
-      onDestroyed: () => {
-        markDone(hooksEverythingBtn);
-      }
+      onDestroyed: trackEnd(hooksEverythingBtn)
     });
 
     driverObj.highlight({
@@ -524,5 +532,104 @@ import { ExampleButton } from "./ExampleButton";
         align: 'start'
       }
     });
+  });
+
+  const trackCompletionBtn = document.getElementById('track-completion');
+
+  function showCompletionSummary(tour, reason, index) {
+    const total = tour.getConfig().steps.length;
+    const summary = driver({ popoverClass: "driverjs-theme" });
+
+    if (reason === "done") {
+      markDone(trackCompletionBtn);
+      summary.highlight({
+        element: "[data-example-btns]",
+        popover: {
+          title: "Tour completed",
+          description: "onDestroyed got <code>reason: \"done\"</code>. This is where you mark onboarding as complete so the user never sees it again.",
+          side: "top",
+          align: "start",
+          showButtons: ["close"],
+        },
+      });
+      return;
+    }
+
+    trackEnd(trackCompletionBtn)(undefined, undefined, { reason, index, config: tour.getConfig() });
+
+    summary.highlight({
+      element: "[data-example-btns]",
+      popover: {
+        title: `You left at step ${index + 1} of ${total}`,
+        description: `onDestroyed got <code>reason: "${reason}"</code> (${REASON_LABELS[reason] ?? reason}). Log it to see where users drop off, or let them pick up where they left.`,
+        side: "top",
+        align: "start",
+        showButtons: ["close"],
+        onPopoverRender: popover => {
+          const resume = document.createElement("button");
+          resume.className = "driver-popover-footer-btn";
+          resume.innerText = "Resume tour";
+          resume.dataset.resume = "";
+          popover.footerButtons.appendChild(resume);
+          popover.footer.style.display = "flex";
+          popover.previousButton.style.display = "none";
+          popover.nextButton.style.display = "none";
+
+          resume.addEventListener("click", () => tour.drive(index));
+        },
+      },
+    });
+  }
+
+  trackCompletionBtn.addEventListener("click", () => {
+    const driverObj = driver({
+      animate: true,
+      popoverClass: "driverjs-theme",
+      showProgress: true,
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Finished or Left?",
+            description: "Driver.js tells you why a tour ended. Finish this tour, or leave it any way you like: close button, Escape or a click outside.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "#track-completion",
+          popover: {
+            title: "Every Example Tracks It",
+            description: "Examples you finish get struck through. Leave one early and its button shows the step you left at instead.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Know Your Drop-off",
+            description: "<code>onDestroyed</code> receives <code>reason</code>: done, close, escape, overlay, replaced or api, plus the step index.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          popover: {
+            title: "Last Step",
+            description: "Press done to finish, or close it now to see the difference.",
+          }
+        },
+      ],
+      onDestroyed: (element, step, { reason, index }) => {
+        if (reason === "replaced") {
+          return;
+        }
+
+        showCompletionSummary(driverObj, reason, index);
+      },
+    });
+
+    driverObj.drive();
   });
 </script>

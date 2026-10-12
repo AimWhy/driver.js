@@ -5,11 +5,23 @@ import type { StageDefinition } from "./stage";
 // Per-instance config, state and emitter, threaded through the helpers so
 // nothing falls back to shared module-level state.
 
+// Why a tour or highlight ended, passed to the hooks that run on destroy.
+//   done     moved past the last step (next/done button, advanceOnClick, arrow key, moveNext)
+//   close    the close button
+//   escape   the escape key
+//   overlay  a click on the overlay
+//   replaced another driver instance started and took over the screen
+//   api      destroy() or a navigation call that left the steps from your own code
+export type DestroyReason = "done" | "close" | "escape" | "overlay" | "replaced" | "api";
+
 export type HookOpts = {
   config: Config;
   state: State;
   driver: Driver;
   index: number | undefined;
+
+  // Only set for onDestroyStarted, onDestroyed and the onDeselected that runs on destroy.
+  reason?: DestroyReason;
 };
 
 export type DriverHook = (element: Element | undefined, step: DriveStep, opts: HookOpts) => void;
@@ -142,6 +154,9 @@ export type State = {
   __resizeTimeout?: number;
   __transitionCallback?: () => void;
   __pendingWaitCancel?: () => void;
+
+  // User action a destroy() called from a hook reports instead of "api".
+  __destroyReason?: DestroyReason;
   __activeStagePosition?: StageDefinition;
   __overlaySvg?: SVGSVGElement;
 
@@ -222,7 +237,7 @@ export type Context = {
   getDriver: () => Driver;
   setDriver: (driver: Driver) => void;
 
-  getHookOpts: (stateOverride?: State) => HookOpts;
+  getHookOpts: (stateOverride?: State, reason?: DestroyReason) => HookOpts;
 };
 
 export function createContext(options: Config = {}): Context {
@@ -251,7 +266,7 @@ export function createContext(options: Config = {}): Context {
       driver = value;
     },
 
-    getHookOpts: (stateOverride?: State) => {
+    getHookOpts: (stateOverride?: State, reason?: DestroyReason) => {
       const activeState = stateOverride || state.getState();
 
       return {
@@ -259,6 +274,7 @@ export function createContext(options: Config = {}): Context {
         state: activeState,
         driver,
         index: activeState.activeIndex,
+        ...(reason ? { reason } : {}),
       };
     },
   };

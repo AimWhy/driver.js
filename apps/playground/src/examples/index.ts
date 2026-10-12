@@ -10,6 +10,7 @@ import { instancesGroup } from "./instances";
 import { skipMissingGroup } from "./skip-missing";
 import { advanceWaitGroup } from "./advance-wait";
 import { hintsGroup } from "./hints";
+import { destroyReasonGroup } from "./destroy-reason";
 
 export const exampleGroups: ExampleGroup[] = [
   highlightGroup,
@@ -20,6 +21,7 @@ export const exampleGroups: ExampleGroup[] = [
   advanceWaitGroup,
   skipMissingGroup,
   instancesGroup,
+  destroyReasonGroup,
   durationGroup,
   scrollGroup,
   apiGroup,

@@ -1,7 +1,7 @@
 import { AllowedButtons, destroyPopover, hidePopover, Popover } from "./popover";
 import { destroyOverlay } from "./overlay";
 import { destroyEvents, initEvents, requireRefresh } from "./events";
-import { Config, createContext, DriverHook } from "./context";
+import { Config, createContext, DestroyReason, DriverHook } from "./context";
 import { destroyHighlight, highlight } from "./highlight";
 import {
   findReachableIndex,
@@ -17,7 +17,7 @@ import "./driver.css";
 let teardownActive: (() => void) | undefined;
 
 // Re-export the public types so they remain part of the package's type surface.
-export type { Config, DriverHook, State } from "./context";
+export type { Config, DestroyReason, DriverHook, HookOpts, State } from "./context";
 export type { StageDefinition } from "./stage";
 export type { Popover, PopoverDOM, Side, Alignment, AllowedButtons } from "./popover";
 
@@ -61,14 +61,23 @@ export interface Driver {
 
 export function driver(options: Config = {}): Driver {
   const ctx = createContext(options);
-  const teardown = () => destroy(false);
+  const teardown = () => destroy("replaced", false);
 
-  function handleClose() {
+  function handleClose(reason: DestroyReason = "close") {
     if (!ctx.getConfig("allowClose")) {
       return;
     }
 
-    destroy();
+    destroy(reason);
+  }
+
+  // Before handing the next action to a user hook on the last step, so a
+  // destroy() from that hook still reports the tour as done.
+  function markDoneIfLastStep() {
+    const activeIndex = ctx.getState("activeIndex");
+    if (activeIndex !== undefined && findReachableIndex(ctx, activeIndex + 1, 1) === undefined) {
+      ctx.setState("__destroyReason", "done");
+    }
   }
 
   function handleEscape() {
@@ -77,7 +86,7 @@ export function driver(options: Config = {}): Driver {
       return;
     }
 
-    handleClose();
+    handleClose("escape");
   }
 
   function canUseButton(button: AllowedButtons) {
@@ -90,11 +99,13 @@ export function driver(options: Config = {}): Driver {
     const overlayClickBehavior = ctx.getConfig("overlayClickBehavior");
 
     if (ctx.getConfig("allowClose") && overlayClickBehavior === "close") {
-      destroy();
+      destroy("overlay");
       return;
     }
 
     if (typeof overlayClickBehavior === "function") {
+      ctx.setState("__destroyReason", "overlay");
+
       const activeStep = ctx.getState("__activeStep");
       const activeElement = ctx.getState("__activeElement");
 
@@ -109,6 +120,7 @@ export function driver(options: Config = {}): Driver {
 
       const onNextClick = resolveNextHook(ctx, activeStep);
       if (onNextClick) {
+        markDoneIfLastStep();
         onNextClick(activeElement, activeStep!, ctx.getHookOpts());
         return;
       }
@@ -128,7 +140,7 @@ export function driver(options: Config = {}): Driver {
     if (steps[nextStepIndex]) {
       drive(nextStepIndex);
     } else {
-      destroy();
+      destroy("done");
     }
   }
 
@@ -143,7 +155,7 @@ export function driver(options: Config = {}): Driver {
     if (steps[previousStepIndex]) {
       drive(previousStepIndex);
     } else {
-      destroy();
+      destroy("api");
     }
   }
 
@@ -153,7 +165,7 @@ export function driver(options: Config = {}): Driver {
     if (steps[index]) {
       drive(index);
     } else {
-      destroy();
+      destroy("api");
     }
   }
 
@@ -176,6 +188,7 @@ export function driver(options: Config = {}): Driver {
     const activeElement = ctx.getState("__activeElement");
     const onNextClick = resolveNextHook(ctx, activeStep);
     if (onNextClick) {
+      markDoneIfLastStep();
       onNextClick(activeElement, activeStep, ctx.getHookOpts());
       return;
     }
@@ -232,6 +245,7 @@ export function driver(options: Config = {}): Driver {
 
     const onNextClick = resolveNextHook(ctx, activeStep);
     if (onNextClick) {
+      markDoneIfLastStep();
       return onNextClick(activeElement, activeStep, ctx.getHookOpts());
     }
 
@@ -304,15 +318,17 @@ export function driver(options: Config = {}): Driver {
   function drive(stepIndex: number = 0, hasWaitedForElement = false) {
     cancelElementWait();
 
+    ctx.setState("__destroyReason", undefined);
+
     const steps = ctx.getConfig("steps");
     if (!steps) {
       console.error("No steps to drive through");
-      destroy();
+      destroy("api");
       return;
     }
 
     if (!steps[stepIndex]) {
-      destroy();
+      destroy("api");
 
       return;
     }
@@ -335,7 +351,7 @@ export function driver(options: Config = {}): Driver {
       if (steps[stepIndex + direction]) {
         drive(stepIndex + direction);
       } else if (direction === 1) {
-        destroy();
+        destroy("done");
       }
 
       return;
@@ -351,7 +367,7 @@ export function driver(options: Config = {}): Driver {
       resolveTourStep(ctx, stepIndex, {
         onNextClick: () => {
           if (!hasNextStep) {
-            destroy();
+            destroy("done");
           } else {
             drive(stepIndex + 1);
           }
@@ -360,15 +376,19 @@ export function driver(options: Config = {}): Driver {
           drive(stepIndex - 1);
         },
         onCloseClick: () => {
-          destroy();
+          destroy("close");
         },
       })
     );
   }
 
-  function destroy(withOnDestroyStartedHook = true) {
+  function destroy(reason: DestroyReason, withOnDestroyStartedHook = true) {
     if (!ctx.getState("isInitialized")) {
       return;
+    }
+
+    if (reason === "api") {
+      reason = ctx.getState("__destroyReason") ?? "api";
     }
 
     const activeElement = ctx.getState("__activeElement");
@@ -381,8 +401,14 @@ export function driver(options: Config = {}): Driver {
     // the hook for when user calls `destroy`, driver will get into infinite loop
     // not causing tour to be destroyed.
     if (withOnDestroyStartedHook && onDestroyStarted) {
+      ctx.setState("__destroyReason", reason);
+
       const isActiveDummyElement = !activeElement || activeElement?.id === "driver-dummy-element";
-      onDestroyStarted(isActiveDummyElement ? undefined : activeElement, activeStep!, ctx.getHookOpts());
+      onDestroyStarted(
+        isActiveDummyElement ? undefined : activeElement,
+        activeStep!,
+        ctx.getHookOpts(undefined, reason)
+      );
       return;
     }
 
@@ -410,11 +436,19 @@ export function driver(options: Config = {}): Driver {
     if (activeElement && activeStep) {
       const isActiveDummyElement = activeElement.id === "driver-dummy-element";
       if (onDeselected) {
-        onDeselected(isActiveDummyElement ? undefined : activeElement, activeStep, ctx.getHookOpts(stateBeforeDestroy));
+        onDeselected(
+          isActiveDummyElement ? undefined : activeElement,
+          activeStep,
+          ctx.getHookOpts(stateBeforeDestroy, reason)
+        );
       }
 
       if (onDestroyed) {
-        onDestroyed(isActiveDummyElement ? undefined : activeElement, activeStep, ctx.getHookOpts(stateBeforeDestroy));
+        onDestroyed(
+          isActiveDummyElement ? undefined : activeElement,
+          activeStep,
+          ctx.getHookOpts(stateBeforeDestroy, reason)
+        );
       }
     }
 
@@ -482,6 +516,7 @@ export function driver(options: Config = {}): Driver {
     },
     highlight: (step: DriveStep) => {
       init();
+      ctx.setState("__destroyReason", undefined);
       highlight(ctx, {
         ...step,
         popover: step.popover
@@ -495,7 +530,7 @@ export function driver(options: Config = {}): Driver {
       });
     },
     destroy: () => {
-      destroy(false);
+      destroy("api", false);
     },
   };
 

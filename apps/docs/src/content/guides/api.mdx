@@ -71,7 +71,10 @@ driverObj.highlight({
   /* ... */
 }); // Highlight an element
 
-driverObj.destroy(); // Destroy the tour
+// Destroy the tour. The destroy hooks receive `options.reason` "api",
+// or the reason of the user action when called from inside a hook.
+// https://driverjs.com/docs/configuration#driver-configuration
+driverObj.destroy();
 ```
 
 > Each `driver()` call returns its own independent instance. You can create as many as you need on the same page, and their configuration, steps, and state never overlap. Only one instance can be on screen at a time, so starting a tour or highlight on one instance closes whichever instance is currently active.
