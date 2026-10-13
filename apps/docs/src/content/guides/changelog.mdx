@@ -12,6 +12,13 @@ ships, these entries move under a versioned heading.
 
 ### Added
 
+- Checklists: an onboarding widget in its own `driver.js/checklist` entry
+  (with `dist/checklist.css`). Items start a tour, follow a link or run an
+  action, and are ticked when the user finishes the tour, or by
+  `completeWhen` and `complete()`, or by the user with `allowManualComplete`.
+  Progress comes in through `completed` and goes out through `onProgress`;
+  `onEvent` reports everything for analytics. See the
+  [Checklists guide](/docs/checklists).
 - `reason` in the options of `onDestroyStarted`, `onDestroyed` and the
   `onDeselected` that runs on destroy, telling apart a finished tour
   (`"done"`) from one that was closed (`"close"`, `"escape"`, `"overlay"`),

@@ -12,6 +12,7 @@ import { ExampleButton } from "./ExampleButton";
   <ExampleButton id="no-element" text="No Element" />
   <ExampleButton id="confirm-on-exit" text="Confirm on Exit" />
   <ExampleButton id="track-completion" text="Track Completion" />
+  <ExampleButton id="onboarding-checklist" text="Onboarding Checklist" />
   <ExampleButton id="show-progress" text="Show Progress" />
   <ExampleButton id="simple-element-highlight" text="Simple Highlight" />
   <ExampleButton id="simple-element-highlight-popover" text="Highlight with Popover" />
@@ -28,13 +29,18 @@ import { ExampleButton } from "./ExampleButton";
 
 <script>
   import { driver } from "driver.js";
+  import { checklist } from "driver.js/checklist";
   import "driver.js/dist/driver.css";
+  import "driver.js/dist/checklist.css";
   import { mountDummyElement, removeDummyElement } from "../lib/dummyElement";
+
+  let onboarding;
 
   function markDone(btn) {
     btn.querySelector("[data-left-at]")?.remove();
     btn.classList.add("bg-gray-300", "hover:bg-gray-200", "line-through");
     btn.classList.remove("bg-transparent");
+    onboarding?.refresh();
   }
 
   function trackEnd(btn) {
@@ -632,4 +638,69 @@ import { ExampleButton } from "./ExampleButton";
 
     driverObj.drive();
   });
+
+  const onboardingChecklistBtn = document.getElementById("onboarding-checklist");
+
+  function createOnboarding() {
+    return checklist({
+      id: "homepage-onboarding",
+      className: "driverjs-checklist-theme",
+      allowManualComplete: true,
+      title: "Get to know driver.js",
+      description: "Three quick ways to try it out.",
+      items: [
+        {
+          id: "welcome-tour",
+          title: "Take the welcome tour",
+          description: "Finish it to check this off.",
+          tour: {
+            popoverClass: "driverjs-theme",
+            showButtons: ["next"],
+            steps: [
+              {
+                element: "[data-hero-text]",
+                popover: { title: "Tours from a Checklist", description: "Items can start any tour.", side: "bottom", align: "start" },
+              },
+              {
+                element: "[data-example-btns]",
+                popover: { title: "Examples", description: "Finish any of these next.", side: "top", align: "start" },
+              },
+            ],
+          },
+        },
+        {
+          id: "finish-example",
+          title: "Finish any example",
+          description: "Try any example on this page.",
+          completeWhen: () =>
+            !!document.querySelector("[data-example-btns] button.line-through:not(#onboarding-checklist)"),
+        },
+        {
+          id: "read-docs",
+          title: "Read the checklist docs",
+          description: "Or click the circle to check it off.",
+          href: "/docs/checklists",
+        },
+      ],
+      onComplete: () => markDone(onboardingChecklistBtn),
+    });
+  }
+
+  function showOnboarding() {
+    onboarding = onboarding || createOnboarding();
+    onboarding.show();
+    onboarding.open();
+  }
+
+  onboardingChecklistBtn.addEventListener("click", () => {
+    if (onboarding?.isOpen()) {
+      onboarding.close();
+      return;
+    }
+
+    showOnboarding();
+  });
+
+  // The hero's "Show Demo" menu opens the same checklist.
+  document.addEventListener("driver-docs:show-checklist", showOnboarding);
 </script>

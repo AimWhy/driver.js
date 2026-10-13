@@ -17,7 +17,10 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-    "types": []
+    "types": [],
+    "paths": {
+      "driver.js": ["./src/driver.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["**/*.test.ts", "node_modules", "tests/**", ".history/**"]

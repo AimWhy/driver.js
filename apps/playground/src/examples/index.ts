@@ -10,6 +10,7 @@ import { instancesGroup } from "./instances";
 import { skipMissingGroup } from "./skip-missing";
 import { advanceWaitGroup } from "./advance-wait";
 import { hintsGroup } from "./hints";
+import { checklistGroup } from "./checklist";
 import { destroyReasonGroup } from "./destroy-reason";
 
 export const exampleGroups: ExampleGroup[] = [
@@ -18,6 +19,7 @@ export const exampleGroups: ExampleGroup[] = [
   arrowGroup,
   tourGroup,
   hintsGroup,
+  checklistGroup,
   advanceWaitGroup,
   skipMissingGroup,
   instancesGroup,

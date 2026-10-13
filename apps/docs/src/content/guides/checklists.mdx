@@ -1,0 +1,395 @@
+---
+title: "Checklists"
+description: "Add an onboarding checklist to your app with Driver.js. Items launch product tours, follow links or wait for the user to do something, and tick themselves off as users make progress."
+groupTitle: "Examples"
+sort: 9
+---
+
+import { ChecklistSample } from "../../components/ChecklistSample.tsx";
+
+A checklist is a small "Get started" widget that sits in the corner of your app.
+Each item is one thing you want new users to do. An item can start a tour, open
+a link or run your own code, and it ticks itself off once the user has done it.
+
+Checklists ship as their own entry. Items that start tours use the tour styles,
+so import `driver.css` as well:
+
+```js
+import { checklist } from "driver.js/checklist";
+import "driver.js/dist/driver.css";
+import "driver.js/dist/checklist.css";
+```
+
+Try it below. Finish the tour to tick its item; close it early and the item
+stays open. Clicking _Connect GitHub_ in the mock dashboard ticks the second item.
+
+<ChecklistSample client:load />
+
+Here is the code for the example above:
+
+```js
+const onboarding = checklist({
+  id: "onboarding",
+  title: "Get started",
+  description: "Four steps to your first project.",
+  items: [
+    {
+      id: "tour",
+      title: "Take the tour",
+      tour: [
+        { element: "#new-project", popover: { title: "New Project", description: "..." } },
+        { element: "#connect-github", popover: { title: "Connect GitHub", description: "..." } },
+      ],
+    },
+    {
+      id: "github",
+      title: "Connect GitHub",
+      completeWhen: () => user.githubConnected,
+    },
+    {
+      id: "invite",
+      title: "Invite a teammate",
+      action: () => openInviteModal(),
+    },
+    {
+      id: "docs",
+      title: "Read about saving progress",
+      href: "/docs/checklists#saving-progress",
+    },
+  ],
+});
+
+onboarding.show();
+```
+
+## Items
+
+Every item needs an `id`. Saved progress is a list of these ids, so pick ids
+that stay the same when you reword, translate or reorder items. A warning is
+logged for missing or duplicate ids.
+
+What happens when an item is clicked depends on what it has:
+
+- `tour`: the checklist closes and the tour starts. The item is ticked only
+  when the user finishes the tour; closing it early leaves the item open. The
+  checklist opens again when the tour ends either way. Pass an array of steps,
+  a full [driver configuration](/docs/configuration#driver-configuration), or
+  a `driver()` instance you created yourself; its own hooks keep working.
+- `href`: rendered as a link. The item is ticked on click and the link
+  navigates as usual.
+- `action`: your function runs with `(item, { checklist })` and the item is
+  ticked.
+- None of these: the item is a plain row, ticked by `completeWhen` or by
+  calling `complete(id)`.
+
+### Completing items from your app
+
+Some tasks are done in your app, not in the checklist. Give the item a
+`completeWhen` function and the checklist ticks it as soon as it returns
+`true`. It is checked on `show()`, after the item's tour or action, and
+whenever you call `refresh()`:
+
+```js
+const onboarding = checklist({
+  id: "onboarding",
+  items: [{ id: "github", title: "Connect GitHub", completeWhen: () => user.githubConnected }],
+});
+
+// After the user connects GitHub somewhere in your app
+onboarding.refresh();
+```
+
+`completeWhen` also takes over from the default for tours, links and actions:
+the item is ticked only when it returns `true`, not when the tour finishes or
+the link is clicked. You can also tick an item directly with
+`onboarding.complete("github")`.
+
+### Letting users tick items off
+
+Some tasks can't be detected, like "Watch the intro video" or "Read the
+guidelines". Set `allowManualComplete` and the check circle becomes a button:
+users tick an item off themselves, or untick it if they clicked by mistake.
+Clicking the item's text still runs its tour, link or action.
+
+<ChecklistSample
+  idPrefix="checklist-manual"
+  buttonText="Show Manual Checklist"
+  config={{ allowManualComplete: true }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  allowManualComplete: true,
+  items: [
+    { id: "video", title: "Watch the intro video", href: "/intro" },
+    // Only ticked by finishing the tour, even with manual completion on.
+    { id: "tour", title: "Take the tour", tour: steps, allowManualComplete: false },
+  ],
+});
+```
+
+It can be set per item as well, and an item's own value wins. From code, use
+`complete(id)` and `uncomplete(id)`.
+
+## Saving progress
+
+The checklist doesn't store anything itself. Progress comes in through
+`completed`, the ids that are already done, and goes out through `onProgress`
+on every change. Keep it wherever you like: localStorage, your API or the user
+record.
+
+```js
+const onboarding = checklist({
+  id: "onboarding",
+  items,
+  completed: JSON.parse(localStorage.getItem("onboarding") ?? "[]"),
+  onProgress: ({ completed, done, total }) => {
+    localStorage.setItem("onboarding", JSON.stringify(completed));
+  },
+  onComplete: () => onboarding.hide(),
+});
+
+onboarding.show();
+```
+
+Since progress is plain data, your backend can tick items too: pass the ids of
+tasks it knows are done in `completed`.
+
+## Tracking events
+
+`onEvent` receives everything that happens in the checklist, ready to send to
+your analytics:
+
+```js
+checklist({
+  id: "onboarding",
+  items,
+  onEvent: event => {
+    // { kind: "checklist", id: "onboarding", type: "item_completed", itemId: "github", timestamp: 1760000000000 }
+    analytics.track(`checklist_${event.type}`, event);
+  },
+});
+```
+
+The event types are `shown`, `hidden`, `opened`, `closed`, `item_started`,
+`item_completed`, `item_uncompleted`, `tour_ended` (with the tour's [`reason`](/docs/ending-a-tour#finished-or-closed)),
+`completed` and `reset`.
+
+## Customizing
+
+### Theme
+
+Pass `className` to add your own class to the widget, then style its parts.
+This is the theme used on the driver.js homepage:
+
+<ChecklistSample
+  idPrefix="checklist-theme"
+  buttonText="Show Themed Checklist"
+  config={{ className: "driverjs-checklist-theme" }}
+  client:load
+/>
+
+```css
+.driver-checklist.driverjs-checklist-theme {
+  --driver-checklist-color: #000;
+}
+
+.driverjs-checklist-theme .driver-checklist-launcher {
+  border: 2px solid #000;
+  border-radius: 12px;
+  background-color: #fde047;
+  color: #000;
+  box-shadow: 3px 3px 0 0 #000;
+}
+
+.driverjs-checklist-theme .driver-checklist-launcher:hover {
+  background-color: #facc15;
+}
+
+.driverjs-checklist-theme .driver-checklist-launcher-count {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background-color: #000;
+  color: #fde047;
+}
+
+.driverjs-checklist-theme .driver-checklist-panel {
+  border: 2px solid #000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 0 #000;
+}
+
+.driverjs-checklist-theme .driver-checklist-header {
+  border-bottom: 2px solid #000;
+  background-color: #fde047;
+}
+
+.driverjs-checklist-theme .driver-checklist-items {
+  padding-top: 7px;
+}
+
+.driverjs-checklist-theme .driver-checklist-progress-bar {
+  height: 10px;
+  border: 2px solid #000;
+  background-color: #fff;
+}
+
+.driverjs-checklist-theme .driver-checklist-progress-fill {
+  border-radius: 0;
+}
+
+.driverjs-checklist-theme .driver-checklist-check {
+  border-color: #000;
+}
+```
+
+```js
+checklist({
+  id: "onboarding",
+  className: "driverjs-checklist-theme",
+  items,
+});
+```
+
+The parts are `driver-checklist-launcher`, `-launcher-text`, `-launcher-count`,
+`-panel`, `-header`, `-title`, `-description`, `-close-btn`, `-progress`,
+`-progress-text`, `-progress-bar`, `-progress-fill`, `-items`, `-item`,
+`-item-trigger`, `-item-title`, `-item-description` and `-check`. Done items
+get `driver-checklist-item-done`, and the widget gets
+`driver-checklist-complete` once every item is done. The font comes from the
+popover's `--driver-popover-font-family` variable.
+
+### Accent color
+
+To keep the default look in your brand color, set `--driver-checklist-color`.
+It colors the progress bar, the ticks and the focus rings:
+
+<ChecklistSample
+  idPrefix="checklist-color"
+  buttonText="Show Green Checklist"
+  config={{ className: "docs-checklist-green" }}
+  client:load
+/>
+
+```css
+:root {
+  --driver-checklist-color: #16a34a;
+}
+```
+
+### Position and text
+
+The widget sits in the bottom-right corner by default. Use `position` to move
+it to the bottom left, and change any of its text:
+
+<ChecklistSample
+  idPrefix="checklist-text"
+  buttonText="Show Left Checklist"
+  config={{
+    position: "bottom-left",
+    title: "Welcome aboard 👋",
+    description: "Finish these to unlock your workspace.",
+    launcherText: "Setup guide",
+    progressText: "{{done}}/{{total}} complete",
+    launcherProgressText: "{{done}} of {{total}}",
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  position: "bottom-left",
+  title: "Welcome aboard 👋",
+  description: "Finish these to unlock your workspace.",
+  launcherText: "Setup guide",
+  progressText: "{{done}}/{{total}} complete",
+  launcherProgressText: "{{done}} of {{total}}",
+  items,
+});
+```
+
+A launcher label too long for the screen is cut off with an ellipsis, and
+the full text shows as a tooltip.
+
+While a tour runs, the checklist is hidden, and it opens again when the tour
+ends.
+
+## Options
+
+Configuration passed to `checklist()`:
+
+```js
+const onboarding = checklist({
+  // Required. Identifies the checklist in events.
+  id: "onboarding",
+
+  // Required. Array of items, documented below.
+  items: [],
+
+  // Text in the panel header and on the launcher button.
+  title: "Get started",
+  description: "Four steps to your first project.",
+  launcherText: "Get started", // Defaults to the title
+
+  // Progress text; {{done}} and {{total}} are replaced.
+  progressText: "{{done}} of {{total}}",
+
+  // The count on the launcher, same placeholders.
+  // An empty string hides it.
+  launcherProgressText: "{{done}}/{{total}}",
+
+  // Corner of the screen: "bottom-right" (default) or "bottom-left".
+  position: "bottom-right",
+
+  // Extra class on the widget.
+  className: "my-checklist",
+
+  // Let users tick items off, or untick them, with the check circle.
+  allowManualComplete: false,
+
+  // Ids of items that are already done.
+  completed: [],
+
+  // Called with { completed, done, total } whenever progress changes.
+  onProgress: progress => {},
+
+  // Called when an item is ticked, and once when every item is done.
+  onItemComplete: (item, { checklist }) => {},
+  onComplete: ({ checklist }) => {},
+
+  // Called with every checklist event.
+  onEvent: event => {},
+});
+```
+
+Each item in the `items` array:
+
+```js
+const item = {
+  // Required. Stable identity, used for progress.
+  id: "tour",
+
+  // Required. HTML is allowed, like in popovers.
+  title: "Take the tour",
+  description: "A short walk through the dashboard.",
+
+  // What clicking the item does; see Items above.
+  tour: [], // Steps, a driver config or a driver() instance
+  href: "/settings",
+  action: (item, { checklist }) => {},
+
+  // Ticks the item once this returns true.
+  completeWhen: () => false,
+
+  // Overrides the checklist's allowManualComplete for this item.
+  allowManualComplete: true,
+
+  // Your own data, available on the item in hooks.
+  data: {},
+};
+```
+
+See the [API reference](/docs/api#checklists) for the methods on the checklist.

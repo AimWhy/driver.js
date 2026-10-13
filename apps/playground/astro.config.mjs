@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 // to driver.js are reflected instantly with HMR — no build step in between.
 const driverSource = fileURLToPath(new URL("../../packages/driver/src/driver.ts", import.meta.url));
 const hintsSource = fileURLToPath(new URL("../../packages/driver/src/hints.ts", import.meta.url));
+const checklistSource = fileURLToPath(new URL("../../packages/driver/src/checklist.ts", import.meta.url));
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
         // The subpath has to come first: aliases match on prefix, so a
         // "driver.js" entry would otherwise rewrite "driver.js/hints" too.
         "driver.js/hints": hintsSource,
+        "driver.js/checklist": checklistSource,
         "driver.js": driverSource,
       },
     },

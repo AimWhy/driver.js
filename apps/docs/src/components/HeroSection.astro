@@ -63,6 +63,7 @@ import Container from "./Container.astro";
               <button data-demo-item="tour" type="button" class="block w-full cursor-pointer px-4 py-2.5 text-left text-base font-medium text-black hover:bg-yellow-200">Product tour</button>
               <button data-demo-item="hints" type="button" class="block w-full cursor-pointer border-t-2 border-black px-4 py-2.5 text-left text-base font-medium text-black hover:bg-yellow-200">Feature hints</button>
               <button data-demo-item="highlight" type="button" class="block w-full cursor-pointer border-t-2 border-black px-4 py-2.5 text-left text-base font-medium text-black hover:bg-yellow-200">Simple highlight</button>
+              <button data-demo-item="checklist" type="button" class="block w-full cursor-pointer border-t-2 border-black px-4 py-2.5 text-left text-base font-medium text-black hover:bg-yellow-200">Onboarding checklist</button>
             </div>
           </div>
           <a
@@ -284,6 +285,15 @@ import Container from "./Container.astro";
       highlightItem.addEventListener("click", () => {
         closeMenu();
         runHighlight();
+      });
+    }
+
+    const checklistItem = split.querySelector('[data-demo-item="checklist"]');
+    if (checklistItem) {
+      checklistItem.addEventListener("click", () => {
+        closeMenu();
+        // Owned by the examples section, which also has a button for it.
+        document.dispatchEvent(new CustomEvent("driver-docs:show-checklist"));
       });
     }
   }

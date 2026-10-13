@@ -1,6 +1,6 @@
 ---
 title: "Theming"
-description: "Theme Driver.js to match your brand. Apply custom classes and CSS to the popover, buttons, and overlay, or restyle the driver from the ground up."
+description: "Theme Driver.js to match your brand. Apply custom classes and CSS to the popover, buttons, overlay, hints and checklists, or restyle the driver from the ground up."
 groupTitle: "Introduction"
 sort: 5
 ---
@@ -101,7 +101,7 @@ The popover text uses the following font stack by default:
 "Helvetica Neue", Inter, ui-sans-serif, "Apple Color Emoji", Helvetica, Arial, sans-serif;
 ```
 
-To use your own font, override the `--driver-popover-font-family` CSS variable. It's inherited, so you can set it anywhere above the popover (on `:root`, `body`, or a `popoverClass`) and it applies to the title, description, buttons, and progress text at once.
+To use your own font, override the `--driver-popover-font-family` CSS variable. It's inherited, so you can set it anywhere above the popover (on `:root`, `body`, or a `popoverClass`) and it applies to the title, description, buttons, and progress text at once. [Checklists](/docs/checklists) read the same variable.
 
 ```css
 :root {
@@ -172,3 +172,52 @@ Hint popovers are regular Driver.js popovers, so everything above applies to the
 ```
 
 See [Styling Hints](/docs/hints#styling) for live examples, including per-beacon classes, static beacons, and the overlay.
+
+## Styling Checklists
+
+The checklist widget has its own stylesheet and classes. Set `--driver-checklist-color` to recolor the progress bar, the ticks and the focus rings, or pass `className` to the checklist and style its parts:
+
+```js
+checklist({
+  id: "onboarding",
+  className: "my-checklist",
+  items,
+});
+```
+
+```css
+/* Accent color, globally or scoped to your class */
+.my-checklist {
+  --driver-checklist-color: #16a34a;
+}
+
+/* The button that opens the panel */
+.my-checklist .driver-checklist-launcher {
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+
+/* The panel, its header and the progress bar */
+.my-checklist .driver-checklist-panel {
+  border-radius: 4px;
+}
+
+.my-checklist .driver-checklist-title {
+  font-size: 20px;
+}
+
+.my-checklist .driver-checklist-progress-bar {
+  height: 6px;
+}
+
+/* Items, and items once they are done */
+.my-checklist .driver-checklist-item-title {
+  font-weight: 500;
+}
+
+.my-checklist .driver-checklist-item-done .driver-checklist-item-title {
+  text-decoration: none;
+}
+```
+
+See [Styling Checklists](/docs/styling#checklist) for live examples and the full list of class names.

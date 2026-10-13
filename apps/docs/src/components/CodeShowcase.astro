@@ -63,6 +63,23 @@ const productHints = hints({
 
 productHints.show();`,
   },
+  {
+    name: "Checklist",
+    code: `import { checklist } from "driver.js/checklist";
+import "driver.js/dist/driver.css";
+import "driver.js/dist/checklist.css";
+
+const onboarding = checklist({
+  id: "onboarding",
+  items: [
+    { id: "tour", title: "Take the tour", tour: steps },
+    { id: "invite", title: "Invite a teammate", action: openInviteModal },
+    { id: "github", title: "Connect GitHub", completeWhen: () => user.githubConnected },
+  ],
+});
+
+onboarding.show();`,
+  },
 ];
 ---
 
@@ -70,7 +87,7 @@ productHints.show();`,
   <Container>
     <h2 class="text-3xl md:text-4xl font-bold mb-2 md:mb-3">Your first tour in seconds 🦊</h2>
     <p class="text-base text-black/70 md:text-lg mb-8 md:mb-10">
-      Import driver.js, describe your steps, and call <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-black">drive()</code>. That's the whole setup. Hints follow the same recipe with <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-black">show()</code>.
+      Import driver.js, describe your steps, and call <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-black">drive()</code>. That's the whole setup. Hints and checklists follow the same recipe with <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm text-black">show()</code>.
     </p>
 
     <div id="code-showcase" class="overflow-hidden rounded-2xl bg-[#101010] shadow-[6px_6px_0_0_#000]">

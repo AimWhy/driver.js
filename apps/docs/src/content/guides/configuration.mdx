@@ -516,6 +516,109 @@ type DriverHint = {
 };
 ```
 
+## Checklist Configuration
+
+Checklists are configured through the `checklist()` factory from the `driver.js/checklist` entry. See the [Checklists guide](/docs/checklists) for an introduction and examples; the full options are given below.
+
+```typescript
+type ChecklistConfig = {
+  // Identifies the checklist in events.
+  id: string;
+
+  // Array of items. See the Checklist Item
+  // Configuration section below for the format.
+  items: ChecklistItem[];
+
+  // Text in the panel header, below the title, and on the
+  // launcher button. (defaults: "Get started", none, the title)
+  title?: string;
+  description?: string;
+  launcherText?: string;
+
+  // Progress text next to the bar; {{done}} and {{total}}
+  // are replaced. (default: "{{done}} of {{total}}")
+  progressText?: string;
+
+  // The count on the launcher, with the same placeholders.
+  // An empty string hides it. (default: "{{done}}/{{total}}")
+  launcherProgressText?: string;
+
+  // Corner of the screen. (default: "bottom-right")
+  position?: "bottom-right" | "bottom-left";
+
+  // Extra class on the widget.
+  className?: string;
+
+  // Turns the check circle into a button, so users can tick
+  // items off, or untick them, themselves. (default: false)
+  allowManualComplete?: boolean;
+
+  // Ids of the items that are already done, for progress
+  // you saved earlier.
+  completed?: string[];
+
+  // Called on every change with the ids of the done items
+  // (including ids no longer in `items`) and the count.
+  onProgress?: (progress: { completed: string[]; done: number; total: number }) => void;
+
+  // Called when an item is ticked, and once when every
+  // item is done.
+  onItemComplete?: (item: ChecklistItem, options: { checklist: Checklist }) => void;
+  onComplete?: (options: { checklist: Checklist }) => void;
+
+  // Called with every checklist event: shown, hidden, opened,
+  // closed, item_started, item_completed, item_uncompleted,
+  // tour_ended, completed and reset. tour_ended carries the
+  // tour's destroy reason.
+  onEvent?: (event: {
+    kind: "checklist";
+    id: string;
+    type: string;
+    itemId?: string;
+    reason?: DestroyReason;
+    timestamp: number;
+  }) => void;
+};
+```
+
+## Checklist Item Configuration
+
+Each entry of the `items` array is one task. Clicking it starts its tour, follows its link or runs its action.
+
+```typescript
+type ChecklistItem = {
+  // Stable identity, used for progress. Keep it the
+  // same when you reword or reorder items.
+  id: string;
+
+  // HTML is allowed, like in popovers.
+  title: string;
+  description?: string;
+
+  // A tour to run: steps, a driver configuration or a
+  // driver() instance. The item is ticked when the user
+  // finishes the tour, not when they close it early.
+  tour?: DriveStep[] | Config | Driver;
+
+  // A link to follow. The item is ticked on click.
+  href?: string;
+
+  // Your own code to run. The item is ticked afterwards.
+  action?: (item: ChecklistItem, options: { checklist: Checklist }) => void;
+
+  // Ticks the item once it returns true. Checked on show(),
+  // refresh() and after the item's tour or action, and it
+  // replaces the default ticking above.
+  completeWhen?: () => boolean;
+
+  // Overrides the checklist's allowManualComplete for this item.
+  allowManualComplete?: boolean;
+
+  // Your own data, available on the item in hooks.
+  data?: Record<string, any>;
+};
+```
+
 ## State
 
 You can access the current state of the driver by calling the `getState` method. It's also passed to the hooks and callbacks.

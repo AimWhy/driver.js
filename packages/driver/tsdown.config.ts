@@ -39,4 +39,18 @@ export default defineConfig([
       minify: true,
     },
   },
+  {
+    ...shared,
+    entry: { checklist: "src/checklist.ts" },
+    format: ["es", "cjs", "iife"],
+    globalName: "driverChecklist",
+    // Tours started from the checklist run on the page's own copy of the core,
+    // so it stays an import; the CDN build reads it from the driver.js global.
+    deps: { neverBundle: ["driver.js"] },
+    outputOptions: { globals: { "driver.js": "driver.js" } },
+    css: {
+      fileName: "checklist.css",
+      minify: true,
+    },
+  },
 ]);
