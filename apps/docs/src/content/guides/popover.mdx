@@ -323,23 +323,24 @@ You can use the `showButtons` option to choose which buttons to show in the popo
     id={"buttons-no-close"}
     client:load />
   <CodeSample
-    buttonText="No Buttons (Use Arrows)"
+    buttonText="No Buttons (Click to Advance)"
     config={{
       showButtons: [undefined],
+      advanceOnClick: true,
     }}
     tour={[
       {
         element: '#driver-note',
         popover: {
           title: 'Popover Title',
-          description: 'Popover Description'
+          description: 'No buttons here. Click the highlighted element to move on.'
         }
       },
       {
         element: '#driver-note code:nth-child(2)',
         popover: {
           title: 'Popover Title',
-          description: 'Popover Description',
+          description: 'Click the highlighted element again to finish.',
           side: 'bottom',
           align: 'start'
         }
