@@ -177,7 +177,11 @@ export function renderPopover(anchor: Element, options: PopoverRenderOptions): P
   onDriverClick(
     popover.wrapper,
     e => {
-      const target = e.target as HTMLElement;
+      // Synthetic events can target a Text node, which has no closest()
+      const target = e.target instanceof Element ? e.target : (e.target as Node | null)?.parentElement;
+      if (!target) {
+        return undefined;
+      }
 
       if (!!target.closest(".driver-popover-next-btn")) {
         return options.onNextClick?.();

@@ -650,3 +650,20 @@ describe("popover offset", () => {
     expect(near - far).toBe(40);
   });
 });
+
+describe("popover click target", () => {
+  it("handles clicks whose target is a text node", () => {
+    const d = createDriver({ animate: false });
+    d.highlight({ element: "#intro", popover: { title: "Intro", description: "Some text" } });
+
+    const errors: unknown[] = [];
+    const onError = (e: ErrorEvent) => errors.push(e.error);
+    window.addEventListener("error", onError);
+
+    const text = document.querySelector(".driver-popover-description")!.firstChild!;
+    text.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    window.removeEventListener("error", onError);
+    expect(errors).toEqual([]);
+  });
+});
