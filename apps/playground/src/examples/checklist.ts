@@ -96,5 +96,27 @@ export const checklistGroup: ExampleGroup = {
         list.open();
       },
     },
+    {
+      id: "checklist-no-launcher",
+      title: "Without the Launcher",
+      description:
+        "launcher: false drops the floating button. Card Four opens and closes the panel with toggle(), and focus returns to it when the panel is closed with × or Escape.",
+      run() {
+        const list = checklist({
+          id: "playground-no-launcher",
+          launcher: false,
+          items: [
+            { id: "tour", title: "Take the tour", tour: basicTourSteps },
+            { id: "docs", title: "Read the docs", href: "#docs" },
+          ],
+        });
+
+        const button = document.getElementById("card-4")!;
+        button.textContent = "Open checklist";
+        button.addEventListener("click", () => list.toggle());
+
+        list.show();
+      },
+    },
   ],
 };

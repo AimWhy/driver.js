@@ -132,6 +132,12 @@
   animation: driver-checklist-in 200ms ease-out;
 }
 
+/* No launcher to leave room for. */
+.driver-checklist-no-launcher .driver-checklist-panel {
+  max-height: min(520px, calc(100vh - 2 * var(--driver-checklist-y)));
+  max-height: min(520px, calc(100dvh - 2 * var(--driver-checklist-y)));
+}
+
 .driver-checklist-panel[hidden],
 .driver-checklist-description[hidden],
 .driver-checklist-launcher-count[hidden] {

@@ -562,6 +562,10 @@ type ChecklistConfig = {
   // An empty string hides it. (default: "{{done}}/{{total}}")
   launcherProgressText?: string;
 
+  // false hides the floating launcher, for pages that open the panel
+  // from their own button with open() or toggle(). (default: true)
+  launcher?: boolean;
+
   // Corner of the screen. In the top corners the panel
   // opens below the launcher. (default: "bottom-right")
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";

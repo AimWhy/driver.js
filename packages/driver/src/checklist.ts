@@ -78,6 +78,9 @@ export type ChecklistConfig = {
   // The count on the launcher; an empty string hides it.
   launcherProgressText?: string;
   position?: ChecklistPosition;
+  // false skips the floating launcher, for pages that open the panel from
+  // their own UI with open() / toggle(). (default: true)
+  launcher?: boolean;
   // Distance in pixels from the screen edges. (default: 20, 12 on phones)
   offset?: { x?: number; y?: number };
   className?: string;
@@ -153,6 +156,7 @@ export function checklist(config: ChecklistConfig): Checklist {
   let dom: ChecklistDOM | undefined;
   let teardown: (() => void)[] = [];
   let isOpen = false;
+  let openedFrom: Element | null = null;
   let hasCompleted = false;
 
   warnAboutIds(currentConfig);
@@ -385,7 +389,7 @@ export function checklist(config: ChecklistConfig): Checklist {
     closeButton.innerHTML = "&times;";
     closeButton.addEventListener("click", () => {
       close();
-      dom?.launcher.focus();
+      restoreFocus();
     });
     header.appendChild(closeButton);
 
@@ -434,7 +438,13 @@ export function checklist(config: ChecklistConfig): Checklist {
     launcher.appendChild(launcherCount);
 
     root.appendChild(panel);
-    root.appendChild(launcher);
+    // Without a launcher it is still built, just never attached, so the code
+    // syncing its text and state has nothing to special-case.
+    if (currentConfig.launcher === false) {
+      root.classList.add("driver-checklist-no-launcher");
+    } else {
+      root.appendChild(launcher);
+    }
 
     return { root, panel, title, description, progressText, progressFill, list, launcher, launcherText, launcherCount };
   }
@@ -446,7 +456,7 @@ export function checklist(config: ChecklistConfig): Checklist {
       }
 
       close();
-      dom.launcher.focus();
+      restoreFocus();
     };
 
     window.addEventListener("keyup", onKeyup);
@@ -581,6 +591,7 @@ export function checklist(config: ChecklistConfig): Checklist {
     }
 
     isOpen = true;
+    openedFrom = document.activeElement;
     dom.panel.hidden = false;
     dom.launcher.setAttribute("aria-expanded", "true");
     emit("opened");
@@ -595,6 +606,14 @@ export function checklist(config: ChecklistConfig): Checklist {
     dom.panel.hidden = true;
     dom.launcher.setAttribute("aria-expanded", "false");
     emit("closed");
+  }
+
+  // Back to the launcher, or without one, to whatever opened the panel.
+  function restoreFocus() {
+    const target = currentConfig.launcher === false ? openedFrom : dom?.launcher;
+    if (target instanceof HTMLElement) {
+      target.focus();
+    }
   }
 
   function toggle() {

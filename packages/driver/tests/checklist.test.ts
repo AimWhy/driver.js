@@ -246,6 +246,36 @@ describe("opening and closing", () => {
     expect(list.isOpen()).toBe(false);
   });
 
+  it("renders without a launcher when launcher is false", () => {
+    const list = createChecklist({ launcher: false });
+    list.show();
+
+    expect(launcher()).toBeNull();
+    expect(root()?.classList.contains("driver-checklist-no-launcher")).toBe(true);
+
+    list.open();
+    expect(panel()?.hidden).toBe(false);
+  });
+
+  it("hands focus back to the page's own trigger when there is no launcher", () => {
+    const list = createChecklist({ launcher: false });
+    list.show();
+
+    const own = document.getElementById("card-1") as HTMLButtonElement;
+    own.focus();
+    list.open();
+    trigger("tour")?.focus();
+    pressKey("Escape");
+
+    expect(list.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(own);
+
+    own.focus();
+    list.open();
+    document.querySelector<HTMLButtonElement>(".driver-checklist-close-btn")?.click();
+    expect(document.activeElement).toBe(own);
+  });
+
   it("ignores Escape pressed elsewhere on the page", () => {
     const list = createChecklist();
     list.show();
