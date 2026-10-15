@@ -255,9 +255,15 @@
 .driver-checklist-item:has(
   button.driver-checklist-item-trigger:hover,
   a.driver-checklist-item-trigger:hover,
-  button.driver-checklist-check + div.driver-checklist-item-trigger:hover
+  button.driver-checklist-check + div.driver-checklist-item-trigger:hover,
+  .driver-checklist-item-trigger:focus-visible
 ) {
   background-color: #f7f7f7;
+}
+
+/* A focused item is marked by its row's background above, not a ring. */
+.driver-checklist-item-trigger:focus-visible {
+  outline: none;
 }
 
 .driver-checklist-item-trigger {
@@ -280,7 +286,6 @@ button.driver-checklist-check + div.driver-checklist-item-trigger {
 }
 
 .driver-checklist-launcher:focus-visible,
-.driver-checklist-item-trigger:focus-visible,
 .driver-checklist-check:focus-visible {
   outline: 2px solid var(--driver-checklist-color, #2d2d2d);
   outline-offset: 2px;
