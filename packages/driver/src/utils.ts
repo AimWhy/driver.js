@@ -82,3 +82,9 @@ function isElementInView(element: Element) {
 export function isElementVisible(el: HTMLElement) {
   return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
 }
+
+// A modal <dialog> renders in the top layer, above everything in <body>, so
+// UI for an element inside one has to live in that dialog to be visible.
+export function layerFor(element: Element): Element {
+  return element.closest("dialog[open]") ?? document.body;
+}

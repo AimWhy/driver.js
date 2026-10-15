@@ -238,5 +238,42 @@ export const hintsGroup: ExampleGroup = {
         }).show();
       },
     },
+    {
+      id: "hints-modal-dialog",
+      title: "Hints in a Modal Dialog",
+      description:
+        "A dialog opened with showModal() renders in the browser's top layer. The beacon and popover of a hint inside it must render in the dialog too, or they end up hidden behind it.",
+      run() {
+        const dialog = document.createElement("dialog");
+        dialog.className = "m-auto rounded-lg p-6 shadow-xl backdrop:bg-black/40";
+        dialog.innerHTML = `
+          <h2 class="mb-2 text-xl font-semibold">Native modal dialog</h2>
+          <p class="mb-4">There should be a beacon on the Save button.</p>
+          <div class="flex gap-2.5">
+            <button id="dialog-save" type="button" class="rounded-md border border-gray-300 px-4 py-1.5">Save</button>
+            <button id="dialog-close" type="button" class="rounded-md border border-gray-300 px-4 py-1.5">Close</button>
+          </div>
+        `;
+        document.body.appendChild(dialog);
+        dialog.querySelector("#dialog-close")!.addEventListener("click", () => dialog.close());
+        dialog.showModal();
+
+        hints({
+          overlay: true,
+          hints: [
+            {
+              element: "#dialog-save",
+              id: "dialog-save",
+              popover: {
+                title: "Inside the Dialog",
+                description: "This beacon and popover have to render inside the modal dialog to be visible.",
+                side: "bottom",
+                align: "start",
+              },
+            },
+          ],
+        }).show();
+      },
+    },
   ],
 };

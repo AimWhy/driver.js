@@ -9,7 +9,7 @@ import {
 } from "./popover";
 import { generateStageSvgPathString } from "./stage";
 import { ARROW_CORNER_INSET, PositionOptions, repositionPopover } from "./position";
-import { resolveElement } from "./utils";
+import { layerFor, resolveElement } from "./utils";
 import "./hints.css";
 
 // The cutout around the active hint's element, mirroring the tour's defaults.
@@ -226,7 +226,7 @@ export function hints(config: HintsConfig = {}): Hints {
     }
 
     const beacon = createBeacon(hint, id);
-    document.body.appendChild(beacon);
+    layerFor(element).appendChild(beacon);
 
     const entry: MountedHint = { hint, id, element, beacon };
     mounted.push(entry);
@@ -388,7 +388,7 @@ export function hints(config: HintsConfig = {}): Hints {
     path.style.pointerEvents = "auto";
 
     svg.appendChild(path);
-    document.body.appendChild(svg);
+    layerFor(entry.element).appendChild(svg);
 
     overlay = svg;
   }

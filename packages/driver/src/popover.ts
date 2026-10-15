@@ -1,7 +1,7 @@
 import type { DriverHook, HookOpts } from "./context";
 import { destroyDriverClick, onDriverClick } from "./click";
 import { PositionOptions, repositionPopover } from "./position";
-import { bringInView, getFocusableElements } from "./utils";
+import { bringInView, getFocusableElements, layerFor } from "./utils";
 
 export type Side = "top" | "right" | "bottom" | "left";
 export type Alignment = "start" | "center" | "end";
@@ -96,7 +96,7 @@ export function hidePopover(popover: PopoverDOM | undefined) {
 
 export function renderPopover(anchor: Element, options: PopoverRenderOptions): PopoverDOM {
   const popover = createPopover();
-  document.body.appendChild(popover.wrapper);
+  layerFor(anchor).appendChild(popover.wrapper);
 
   const { title, description, showButtons, disableButtons, showProgress, nextBtnText, prevBtnText, progressText } =
     options;

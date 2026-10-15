@@ -982,3 +982,25 @@ describe("multiple instances", () => {
     second.hide();
   });
 });
+
+describe("modal dialogs", () => {
+  // A modal dialog renders in the top layer, above anything left in <body>.
+  it("mounts the beacon, overlay and popover inside the target's open dialog", () => {
+    document.body.insertAdjacentHTML("beforeend", `<dialog open><button id="in-dialog">Save</button></dialog>`);
+    const dialog = document.querySelector("dialog")!;
+
+    const h = createHints({ overlay: true, hints: [{ element: "#in-dialog", id: "d", popover: { title: "In dialog" } }] });
+    h.show();
+    h.open("d");
+
+    expect(dialog.contains(beacons()[0])).toBe(true);
+    expect(dialog.contains(document.querySelector(".driver-hint-overlay"))).toBe(true);
+    expect(dialog.contains(popoverEl())).toBe(true);
+  });
+
+  it("keeps mounting in <body> outside a dialog", () => {
+    createHints({ hints: SAMPLE_HINTS }).show();
+
+    expect(beacons()[0].parentElement).toBe(document.body);
+  });
+});
