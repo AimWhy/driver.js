@@ -1,0 +1,638 @@
+---
+import { ExampleButton } from "./ExampleButton";
+---
+<h2 class="text-3xl md:text-4xl font-bold mb-2 md:mb-3" data-examples-heading>Examples</h2>
+<p class="text-base md:text-lg text-black/70 leading-relaxed" data-examples-tagline>Click an example below to see driver.js in action, or find more <a
+  class="text-black underline underline-offset-4" href="/docs/installation">in the documentation</a>.</p>
+
+<div class="flex flex-wrap gap-3 md:gap-3 lg:gap-4 mt-6 md:mt-8" data-example-btns>
+  <ExampleButton id="animated-tour" text="Animated Tour" />
+  <ExampleButton id="static-tour" text="Non-Animated Tour" />
+  <ExampleButton id="async-tour" text="Async Tour" />
+  <ExampleButton id="no-element" text="No Element" />
+  <ExampleButton id="confirm-on-exit" text="Confirm on Exit" />
+  <ExampleButton id="onboarding-checklist" text="Onboarding Checklist" />
+  <ExampleButton id="compact-checklist" text="Compact Checklist" />
+  <ExampleButton id="show-progress" text="Show Progress" />
+  <ExampleButton id="simple-element-highlight" text="Simple Highlight" />
+  <ExampleButton id="simple-element-highlight-popover" text="Highlight with Popover" />
+  <ExampleButton id="prevent-close" text="Prevent Closing" />
+  <ExampleButton id="overlay-color" text="Overlay Color" />
+  <ExampleButton id="popover-position" text="Popover Positioning" />
+  <ExampleButton id="customizing-popover" text="Customizing Popover" />
+  <ExampleButton id="hooks-everything" text="Hooks for Everything" />
+  <a href="/docs/installation"
+     class="cursor-pointer flex items-center rounded-xl border-2 border-black bg-yellow-300 px-5 py-2 text-base lg:text-lg font-medium text-black shadow-[3px_3px_0_0_#000] transition-all duration-100 hover:bg-yellow-400 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#000]">
+    and more ...
+  </a>
+</div>
+
+<script>
+  import { driver } from "driver.js";
+  import { checklist } from "driver.js/checklist";
+  import "driver.js/dist/driver.css";
+  import "driver.js/dist/checklist.css";
+  import "../styles/checklist-themes/compact.css";
+  import { mountDummyElement, removeDummyElement } from "../lib/dummyElement";
+
+  let onboarding;
+  let launch;
+
+  function markDone(btn) {
+    btn.querySelector("[data-left-at]")?.remove();
+    btn.classList.add("bg-gray-300", "hover:bg-gray-200", "line-through");
+    btn.classList.remove("bg-transparent");
+    onboarding?.refresh();
+  }
+
+  function trackEnd(btn) {
+    return (element, step, { reason, index, config }) => {
+      if (index === undefined || reason === "done") {
+        markDone(btn);
+        return;
+      }
+
+      if (btn.classList.contains("line-through")) {
+        return;
+      }
+
+      const total = config.steps?.length ?? 0;
+      let badge = btn.querySelector("[data-left-at]");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.dataset.leftAt = "";
+        badge.className = "ml-2 rounded-md bg-black/10 px-1.5 py-0.5 text-sm font-normal no-underline";
+        btn.appendChild(badge);
+      }
+
+      badge.textContent = `left at ${index + 1}/${total}`;
+    };
+  }
+
+  const demoTourButton = document.querySelector("[data-demo-tour]");
+  demoTourButton.addEventListener("click", () => {
+    const driverObj = driver({
+      popoverClass: "driverjs-theme",
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-hero-text]",
+          popover: {
+            title: "Before we start",
+            description: "This is just one use-case, make sure to look at the docs for more use-cases and examples.",
+            nextBtnText: "Okay, start!",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-driver-tagline]",
+          popover: {
+            title: "Focus Anything",
+            description: "You can use it to highlight literally anything, images, text, svg, div, span, li etc.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-driver-name]",
+          popover: {
+            title: "Why Driver.js",
+            description: "It's lightweight, has no dependencies, is MIT licensed, is highly customizable, and is super easy to use.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-docs-link]",
+          popover: {
+            title: "More Powerful than Ever",
+            description: "Driver.js has been completely rewritten from scratch and is now more powerful than ever.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-example-btns]",
+          popover: {
+            title: "Examples",
+            description: "Here are some examples to give you a rough idea.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-example-btns] a:last-child",
+          popover: {
+            title: "Visit Docs",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "top",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-driver-license]",
+          popover: {
+            title: "MIT Licensed",
+            description: "Driver.js is MIT licensed and is used by tens of thousands of companies around the world.",
+            side: "top",
+            align: "start"
+          }
+        },
+        {
+          popover: {
+            description: "<img style='width: 270px; margin-bottom: 10px; border-radius: 5px;' src='/fox-gif.gif' />That's it for now, make sure to <a class='underline font-medium outline-0' href='/docs/installation'>visit the docs</a> for more examples and use-cases.",
+            side: "bottom",
+            align: "start",
+            showButtons: [],
+            popoverClass: "default-theme"
+          }
+        }
+      ]
+    });
+
+    driverObj.drive();
+  });
+
+  const animatedTourBtn = document.getElementById('animated-tour');
+  animatedTourBtn.addEventListener("click", () => {
+    const driverObj = driver({
+      popoverClass: "driverjs-theme",
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Animated Tour",
+            description: "Animated tour can simply be achieved by setting `animate` option true.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Just an Example",
+            description: "We don't have many steps in this example, but you can have as many as you want.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline] a",
+          popover: {
+            title: "That's it for now",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+      ],
+      onDestroyed: trackEnd(animatedTourBtn)
+    });
+
+    driverObj.drive();
+  });
+
+  const staticTourBtn = document.getElementById('static-tour');
+  staticTourBtn.addEventListener("click", () => {
+    const driverObj = driver({
+      animate: false,
+      popoverClass: "driverjs-theme",
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Static Tour",
+            description: "This is a static tour, which means that it won't be animated.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Just an Example",
+            description: "We don't have many steps in this example, but you can have as many as you want.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline] a",
+          popover: {
+            title: "That's it for now",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+      ],
+      onDestroyed: trackEnd(staticTourBtn)
+    });
+
+    driverObj.drive();
+  });
+
+  const asyncTourBtn = document.getElementById('async-tour');
+  asyncTourBtn.addEventListener("click", () => {
+    const driverObj = driver({
+      animate: true,
+      popoverClass: "driverjs-theme",
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          popover: {
+            title: "Async Tour",
+            description: "You can also use Driver.js to create async tours. Element for the next step doesn't exist -- we will create before moving next.",
+            side: "bottom",
+            align: "start",
+            onNextClick: () => {
+              mountDummyElement();
+              driverObj.moveNext();
+            }
+          }
+        },
+        {
+          element: '.dynamic-el',
+          popover: {
+            title: "New Element",
+            description: "This element was created after the first step and will be destroyed after this step.",
+            side: "bottom",
+            align: "start",
+            onPrevClick: () => {
+              removeDummyElement();
+              driverObj.movePrevious();
+            },
+            onNextClick: () => {
+              removeDummyElement();
+              driverObj.moveNext();
+            }
+          }
+        },
+        {
+          popover: {
+            title: "More in Docs",
+            description: "There is a detailed guide on <a href='/docs/interactive-tours#async-steps/' target='_blank' class='underline font-bold'>how to create async</a> tours in the documentation.",
+            side: "bottom",
+            align: "start",
+            onPrevClick: () => {
+              mountDummyElement();
+              driverObj.movePrevious();
+            }
+          }
+        },
+      ],
+      onDestroyed: trackEnd(asyncTourBtn)
+    });
+
+    driverObj.drive();
+  });
+
+  const exitConfirm = document.getElementById('confirm-on-exit');
+  exitConfirm.addEventListener("click", () => {
+    const driverObj = driver({
+      animate: true,
+      popoverClass: "driverjs-theme",
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Confirm on Exit",
+            description: "You can also ask for confirmation before exiting the tour.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Just an Example",
+            description: "We don't have many steps in this example, but you can have as many as you want.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline] a",
+          popover: {
+            title: "That's it for now",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+      ],
+      onDestroyStarted: (element, step, { reason }) => {
+        if (reason === "done" || confirm("Are you sure?")) {
+          driverObj.destroy();
+        }
+      },
+      onDestroyed: trackEnd(exitConfirm)
+    });
+
+    driverObj.drive();
+  });
+
+  const showProgressBtn = document.getElementById('show-progress');
+  showProgressBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      animate: true,
+      showProgress: true,
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Show Progress",
+            description: "You can set `showProgress` to `true` and progress will be shown in the footer.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Just an Example",
+            description: "We don't have many steps in this example, but you can have as many as you want.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline] a",
+          popover: {
+            title: "That's it for now",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+      ],
+      onDestroyed: trackEnd(showProgressBtn)
+    });
+
+    driverObj.drive();
+  });
+
+  const simpleHighlightBtn = document.getElementById('simple-element-highlight');
+  simpleHighlightBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      popoverClass: 'driverjs-theme',
+      onDestroyed: trackEnd(simpleHighlightBtn)
+    });
+
+    driverObj.highlight({
+      element: '[data-example-btns]'
+    })
+  });
+
+  const simpleHighlightPopoverBtn = document.getElementById('simple-element-highlight-popover');
+  simpleHighlightPopoverBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      popoverClass: 'driverjs-theme',
+      onDestroyed: trackEnd(simpleHighlightPopoverBtn)
+    });
+
+    driverObj.highlight({
+      element: '[data-example-btns]',
+      popover: {
+        title: "Popover Highlight",
+        description: "You can also highlight an element with a popover.",
+        side: 'top'
+      }
+    });
+  });
+
+  const noElementbtn = document.getElementById('no-element');
+  noElementbtn.addEventListener('click', () => {
+    const driverObj = driver({
+      popoverClass: 'driverjs-theme',
+      onDestroyed: trackEnd(noElementbtn)
+    });
+
+    driverObj.highlight({
+      popover: {
+        title: "Without Element",
+        description: "You can also show a popover without highlighting an element. For example, this popover is shown without highlighting anything.",
+      }
+    });
+  });
+
+  const preventCloseBtn = document.getElementById('prevent-close');
+  preventCloseBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      animate: true,
+      allowClose: false,
+      showProgress: true,
+      showButtons: ["next", "previous"],
+      steps: [
+        {
+          element: "[data-examples-heading]",
+          popover: {
+            title: "Show Progress",
+            description: "You can set `showProgress` to `true` and progress will be shown in the footer.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline]",
+          popover: {
+            title: "Just an Example",
+            description: "We don't have many steps in this example, but you can have as many as you want.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+        {
+          element: "[data-examples-tagline] a",
+          popover: {
+            title: "That's it for now",
+            description: "Make sure to visit the docs for more examples and use-cases.",
+            side: "bottom",
+            align: "start"
+          }
+        },
+      ],
+      onDestroyed: trackEnd(preventCloseBtn)
+    });
+
+    driverObj.drive();
+  });
+
+  const overlayColorBtn = document.getElementById('overlay-color');
+  overlayColorBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      overlayColor: 'red',
+      overlayOpacity: 0.5,
+      onDestroyed: trackEnd(overlayColorBtn)
+    });
+
+    driverObj.highlight({
+      element: '[data-example-btns]',
+      popover: {
+        title: "Popover Highlight",
+        description: "You can also highlight an element with a popover.",
+        side: 'top'
+      }
+    });
+  });
+
+  const popoverPositionBtn = document.getElementById('popover-position');
+  popoverPositionBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      onDestroyed: trackEnd(popoverPositionBtn)
+    });
+
+    driverObj.highlight({
+      element: '#popover-position',
+      popover: {
+        title: "Popover Position",
+        description: "You can also change the position of the popover using `side` and `align` options.<br /> Allowed sides are `top`, `bottom`, `left` and `right`. Allowed aligns are `start`, `center` and `end`.",
+        side: 'top',
+        align: 'start'
+      }
+    });
+  });
+
+  const customizingBtn = document.getElementById('customizing-popover');
+  customizingBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      popoverClass: 'driverjs-theme',
+      onDestroyed: trackEnd(customizingBtn)
+    });
+
+    driverObj.highlight({
+      element: '#customizing-popover',
+      popover: {
+        title: "Customizing Popover",
+        description: "Add your own class using `popoverClass` or use `onPopoverRender` to get full control over the popover. <br /><br /> Visit these pages which cover <a class='font-medium underline' href='/docs/styling#popover'>styling</a> and <a class='font-medium underline' href='/docs/popover#buttons'>customizing popovers</a> in detail.",
+        side: 'top',
+        align: 'start'
+      }
+    });
+  });
+
+  const hooksEverythingBtn = document.getElementById('hooks-everything');
+  hooksEverythingBtn.addEventListener('click', () => {
+    const driverObj = driver({
+      popoverClass: 'driverjs-theme',
+      onDestroyed: trackEnd(hooksEverythingBtn)
+    });
+
+    driverObj.highlight({
+      element: '#hooks-everything',
+      popover: {
+        title: "Hooks for Everything",
+        description: "Have a look at the <a class='font-medium underline' href='/docs/configuration'>configuration</a> page to see how you can use hooks to control the driver.",
+        side: 'top',
+        align: 'start'
+      }
+    });
+  });
+
+  const onboardingChecklistBtn = document.getElementById("onboarding-checklist");
+
+  function createOnboarding() {
+    return checklist({
+      id: "homepage-onboarding",
+      className: "checklist-brutalist",
+      allowManualComplete: true,
+      title: "Get to know driver.js",
+      description: "Four quick ways to try it out.",
+      items: [
+        {
+          id: "welcome-tour",
+          title: "Take the welcome tour",
+          description: "Finish it to check this off.",
+          tour: {
+            popoverClass: "driverjs-theme",
+            showButtons: ["next"],
+            steps: [
+              {
+                element: "[data-hero-text]",
+                popover: { title: "Tours from a Checklist", description: "Items can start any tour.", side: "bottom", align: "start" },
+              },
+              {
+                element: "[data-example-btns]",
+                popover: { title: "Examples", description: "Finish any of these next.", side: "top", align: "start" },
+              },
+            ],
+          },
+        },
+        {
+          id: "try-hints",
+          title: "Try feature hints",
+          description: "Pulsing dots at the top of the page.",
+          action: () => document.dispatchEvent(new CustomEvent("driver-docs:show-hints")),
+        },
+        {
+          id: "finish-example",
+          title: "Finish any example",
+          description: "Try any example on this page.",
+          completeWhen: () =>
+            !!document.querySelector("[data-example-btns] button.line-through:not(#onboarding-checklist)"),
+        },
+        {
+          id: "read-docs",
+          title: "Read the checklist docs",
+          description: "Or click the circle to check it off.",
+          href: "/docs/checklists",
+        },
+      ],
+      onComplete: () => markDone(onboardingChecklistBtn),
+    });
+  }
+
+  function showOnboarding() {
+    launch?.hide();
+    onboarding = onboarding || createOnboarding();
+    onboarding.show();
+    onboarding.open();
+  }
+
+  onboardingChecklistBtn.addEventListener("click", () => {
+    if (onboarding?.isOpen()) {
+      onboarding.close();
+      return;
+    }
+
+    showOnboarding();
+  });
+
+  // The hero's "Show Demo" menu opens the same checklist.
+  document.addEventListener("driver-docs:show-checklist", showOnboarding);
+
+  const compactChecklistBtn = document.getElementById("compact-checklist");
+
+  compactChecklistBtn.addEventListener("click", () => {
+    if (launch?.isOpen()) {
+      launch.close();
+      return;
+    }
+
+    onboarding?.hide();
+    launch =
+      launch ||
+      checklist({
+        id: "homepage-launch",
+        className: "checklist-compact",
+        allowManualComplete: true,
+        title: "Launch checklist",
+        launcherText: "Launch",
+        launcherProgressText: "{{remaining}} left",
+        items: [
+          { id: "install", title: "Install driver.js" },
+          { id: "highlight", title: "Highlight a button" },
+          { id: "tour", title: "Write your first tour" },
+          { id: "ship", title: "Ship it to your users" },
+        ],
+        onComplete: () => markDone(compactChecklistBtn),
+      });
+    launch.show();
+    launch.open();
+  });
+</script>

@@ -1,0 +1,98 @@
+---
+title: "Installation"
+description: "Install Driver.js with npm, yarn, pnpm, or a CDN script tag and add the lightweight, zero-dependency JavaScript tour library to your project in seconds."
+groupTitle: "Introduction"
+sort: 1
+---
+
+Run one of the following commands to install the package:
+
+```bash
+# Using npm
+npm install driver.js
+
+# Using pnpm
+pnpm install driver.js
+
+# Using yarn
+yarn add driver.js
+```
+
+Alternatively, you can use CDN and include the script in your HTML file:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.js.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css" />
+
+<!-- Only if you use hints -->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/hints.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/hints.css" />
+
+<!-- Only if you use checklists -->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/checklist.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/checklist.css" />
+```
+
+## Start Using
+
+Once installed, you can import the package in your project. The following example shows how to highlight an element:
+
+```js
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+const driverObj = driver();
+driverObj.highlight({
+  element: "#some-element",
+  popover: {
+    title: "Title",
+    description: "Description",
+  },
+});
+```
+
+[Hints](/docs/hints) ship as their own entry with a self-contained stylesheet, so import them only when you use them:
+
+```js
+import { hints } from "driver.js/hints";
+import "driver.js/dist/hints.css";
+```
+
+[Checklists](/docs/checklists) work the same way. Their items run tours, so keep `driver.css` alongside:
+
+```js
+import { checklist } from "driver.js/checklist";
+import "driver.js/dist/checklist.css";
+```
+
+### Note on CDN
+
+If you are using the CDN, you will have to use the package from the `window` object:
+
+```js
+const driver = window.driver.js.driver;
+
+const driverObj = driver();
+
+driverObj.highlight({
+  element: "#some-element",
+  popover: {
+    title: "Title",
+    description: "Description",
+  },
+});
+```
+
+The hints build exposes its own global:
+
+```js
+const hints = window.driverHints.hints;
+```
+
+And so does the checklist build. Load it after the main script, which it uses to run tours:
+
+```js
+const checklist = window.driverChecklist.checklist;
+```
+
+Continue reading the [Getting Started](/docs/basic-usage) guide to learn more about the package.

@@ -1,0 +1,16 @@
+packages:
+  - packages/*
+  - apps/*
+
+# Native/postinstall builds, merged from the apps' former standalone
+# workspaces. sharp stays unbuilt on purpose: skipping its install script
+# makes it fall back to the prebuilt platform binaries, while building from
+# source needs node-gyp and fails.
+onlyBuiltDependencies:
+  - esbuild
+allowBuilds:
+  esbuild: true
+  sharp: false
+minimumReleaseAgeExclude:
+  - "@astrojs/markdown-satteri@0.3.1"
+  - astro@7.0.0

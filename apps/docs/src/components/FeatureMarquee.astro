@@ -1,0 +1,55 @@
+---
+const features = [
+  "Supports all Major Browsers",
+  "Works on Mobile Devices",
+  "Highly Customizable",
+  "Light-weight",
+  "No dependencies",
+  "Tours, Highlights & Hints",
+  "MIT Licensed",
+  "Written in TypeScript",
+  "Vanilla JavaScript",
+  "Easy to use",
+  "Accessible",
+  "Frameworks Ready",
+];
+---
+
+<div class="bg-black overflow-hidden">
+  <div class="marquee-track flex h-12 w-max items-center md:h-14">
+    {
+      [0, 1].map(copy => (
+        <div class="flex items-center" aria-hidden={copy === 1}>
+          {features.map(feature => (
+            <span class="flex items-center">
+              <span class="whitespace-nowrap px-5 text-sm font-medium text-white md:text-base">{feature}</span>
+              <span class="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .marquee-track {
+    animation: marquee-scroll 32s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+import Sidebar from "../components/Sidebar.astro";
+import Stage from "../components/Stage.astro";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  activeId?: string;
+}
+
+const { title, description, activeId } = Astro.props;
+const pageTitle = title ? `${title} · driver.js playground` : "driver.js playground";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="bg-white text-sm text-gray-900 antialiased">
+    <div class="grid min-h-screen grid-cols-[260px_1fr]">
+      <Sidebar activeId={activeId} />
+      <main class="p-10">
+        {
+          title && (
+            <div class="mx-auto mb-2.5 max-w-[640px]">
+              <h1 class="text-2xl font-semibold">{title}</h1>
+              {description && <p class="mt-1.5 text-gray-500">{description}</p>}
+            </div>
+          )
+        }
+        <slot />
+        <Stage />
+      </main>
+    </div>
+  </body>
+</html>

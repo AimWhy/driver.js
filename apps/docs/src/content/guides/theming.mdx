@@ -1,0 +1,223 @@
+---
+title: "Theming"
+description: "Theme Driver.js to match your brand. Apply custom classes and CSS to the popover, buttons, overlay, hints and checklists, or restyle the driver from the ground up."
+groupTitle: "Introduction"
+sort: 5
+---
+
+You can customize the look and feel of the driver by adding custom class to popover or applying CSS to different classes used by driver.js.
+
+## Styling Popover
+
+You can set the `popoverClass` option globally in the driver configuration or at the step level to apply custom class to the popover and then use CSS to apply styles.
+
+```js
+const driverObj = driver({
+  popoverClass: "my-custom-popover-class",
+});
+
+// or you can also have different classes for different steps
+const driverObj2 = driver({
+  steps: [
+    {
+      element: "#some-element",
+      popover: {
+        title: "Title",
+        description: "Description",
+        popoverClass: "my-custom-popover-class",
+      },
+    },
+  ],
+});
+```
+
+Here is the list of classes applied to the popover which you can use in conjunction with `popoverClass` option to apply custom styles on the popover.
+
+```css
+/* Class assigned to popover wrapper */
+.driver-popover {
+}
+
+/* Arrow pointing towards the highlighted element */
+.driver-popover-arrow {
+}
+
+/* Rendered side and alignment of the popover. These reflect the actual
+   position after Driver.js flips the popover to fit it in the viewport,
+   so they may differ from the side/align you configured. */
+.driver-popover-side-top {
+}
+.driver-popover-side-right {
+}
+.driver-popover-side-bottom {
+}
+.driver-popover-side-left {
+}
+.driver-popover-align-start {
+}
+.driver-popover-align-center {
+}
+.driver-popover-align-end {
+}
+
+/* Title and description */
+.driver-popover-title {
+}
+.driver-popover-description {
+}
+
+/* Close button displayed on the top right corner */
+.driver-popover-close-btn {
+}
+
+/* Footer of the popover displaying progress and navigation buttons */
+.driver-popover-footer {
+}
+.driver-popover-progress-text {
+}
+.driver-popover-prev-btn {
+}
+.driver-popover-next-btn {
+}
+
+/* Shared style for the footer buttons. The built-in prev/next buttons carry it,
+   and you can add it to custom buttons created in onPopoverRender to give them
+   the default button look (or leave it off to apply your own styles). */
+.driver-popover-footer-btn {
+}
+
+/* Added to the next button on the last step, when it acts as the "Done" button */
+.driver-popover-next-btn.driver-popover-done-btn {
+}
+```
+
+Visit the [example page](/docs/styling#popover) for an example that modifies the popover styles.
+
+## Custom Font
+
+The popover text uses the following font stack by default:
+
+```css
+"Helvetica Neue", Inter, ui-sans-serif, "Apple Color Emoji", Helvetica, Arial, sans-serif;
+```
+
+To use your own font, override the `--driver-popover-font-family` CSS variable. It's inherited, so you can set it anywhere above the popover (on `:root`, `body`, or a `popoverClass`) and it applies to the title, description, buttons, and progress text at once. [Checklists](/docs/checklists) read the same variable.
+
+```css
+:root {
+  --driver-popover-font-family: "Inter", sans-serif;
+}
+```
+
+## Modifying Popover DOM
+
+Alternatively, you can also use the `onPopoverRender` hook to modify the popover DOM before it is displayed. The hook is called with the popover DOM as the first argument.
+
+```typescript
+type PopoverDOM = {
+  wrapper: HTMLElement;
+  arrow: HTMLElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  footer: HTMLElement;
+  progress: HTMLElement;
+  previousButton: HTMLElement;
+  nextButton: HTMLElement;
+  closeButton: HTMLElement;
+  footerButtons: HTMLElement;
+};
+
+onPopoverRender?: (popover: PopoverDOM, opts: { config: Config; state: State }) => void;
+```
+
+## Styling Page
+
+Following classes are applied to the page when the driver is active.
+
+```css
+/* Applied to the `body` when the driver: */
+.driver-active {
+} /* is active */
+.driver-fade {
+} /* is animated */
+.driver-simple {
+} /* is not animated */
+```
+
+Following classes are applied to the overlay i.e. the lightbox displayed over the page.
+
+```css
+.driver-overlay {
+}
+```
+
+## Styling Highlighted Element
+
+Whenever an element is highlighted, the following classes are applied to it.
+
+```css
+.driver-active-element {
+}
+```
+
+## Styling Hints
+
+Hint popovers are regular Driver.js popovers, so everything above applies to them unchanged. The beacons read two CSS variables, settable globally or scoped to a class you pass through a hint's `beacon.className`:
+
+```css
+.driver-hint {
+  --driver-hint-size: 32px;
+  --driver-hint-color: #e11d48;
+}
+```
+
+See [Styling Hints](/docs/hints#styling) for live examples, including per-beacon classes, static beacons, and the overlay.
+
+## Styling Checklists
+
+The checklist widget has its own stylesheet and classes. Set `--driver-checklist-color` to recolor the progress bar, the ticks and the focus rings, or pass `className` to the checklist and style its parts:
+
+```js
+checklist({
+  id: "onboarding",
+  className: "my-checklist",
+  items,
+});
+```
+
+```css
+/* Accent color, globally or scoped to your class */
+.my-checklist {
+  --driver-checklist-color: #16a34a;
+}
+
+/* The button that opens the panel */
+.my-checklist .driver-checklist-launcher {
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+
+/* The panel, its header and the progress bar */
+.my-checklist .driver-checklist-panel {
+  border-radius: 4px;
+}
+
+.my-checklist .driver-checklist-title {
+  font-size: 20px;
+}
+
+.my-checklist .driver-checklist-progress-bar {
+  height: 6px;
+}
+
+/* Items, and items once they are done */
+.my-checklist .driver-checklist-item-title {
+  font-weight: 500;
+}
+
+.my-checklist .driver-checklist-item-done .driver-checklist-item-title {
+  text-decoration: none;
+}
+```
+
+See [Styling Checklists](/docs/styling#checklist) for live examples and the full list of class names.

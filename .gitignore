@@ -10,6 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+# Intermediate output of the hints build, folded into dist/ by the postbuild.
+dist-hints
+dist-types
 *.local
 coverage
 
@@ -24,3 +27,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Turborepo
+.turbo

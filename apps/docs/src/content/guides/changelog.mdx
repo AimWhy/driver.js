@@ -1,0 +1,232 @@
+---
+title: "Changelog"
+description: "Track what's new in Driver.js. See the latest features, changes, and fixes shipping in each release, plus what's currently in the works."
+groupTitle: "Introduction"
+sort: 7
+---
+
+The _Unreleased_ section lists changes merged for the next release. Once it
+ships, these entries move under a versioned heading.
+
+## Unreleased
+
+### Added
+
+- `launcher: false` on checklists drops the floating launcher, for pages
+  that open the panel from their own button with `open()` or `toggle()`.
+  Closing the panel hands focus back to whatever opened it.
+
+### Fixed
+
+- Hints, and popovers of tour steps, whose element is inside an open
+  `<dialog>` now render inside that dialog, so they show above a modal
+  opened with `showModal()` instead of behind it.
+  ([#625](https://github.com/nilbuild/driver.js/issues/625))
+- Clicking the popover no longer throws when the event's target is a text
+  node. ([#626](https://github.com/nilbuild/driver.js/issues/626))
+
+## 1.10.0
+
+### Added
+
+- Checklists: an onboarding widget in its own `driver.js/checklist` entry
+  (with `dist/checklist.css`). Items start a tour, follow a link or run an
+  action, and are ticked when the user finishes the tour, or by
+  `completeWhen` and `complete()`, or by the user with `allowManualComplete`.
+  Progress comes in through `completed` and goes out through `onProgress`;
+  `onEvent` reports everything for analytics. It sits in any corner of the
+  screen (`position`, `offset`), adapts to phones, and can show a different
+  title and launcher text once everything is done. See the
+  [Checklists guide](/docs/checklists), and
+  [Checklist Themes](/docs/checklist-themes) for ready-made themes.
+- `reason` in the options of `onDestroyStarted`, `onDestroyed` and the
+  `onDeselected` that runs on destroy, telling apart a finished tour
+  (`"done"`) from one that was closed (`"close"`, `"escape"`, `"overlay"`),
+  replaced by another instance (`"replaced"`) or ended from code (`"api"`).
+  A `destroy()` called from a hook keeps the reason of the user action that
+  started it. The `DestroyReason` and `HookOpts` types are exported.
+
+### Changed
+
+- The popover's close button only darkens for keyboard focus
+  (`:focus-visible`), so it no longer opens dark after a tour is started with
+  a mouse click.
+
+## 1.9.0
+
+### Added
+
+- `closeBtnLabel` (driver and step level) to set the close button's
+  `aria-label`, for translated tours. Defaults to `Close`.
+  ([#623](https://github.com/nilbuild/driver.js/issues/623))
+- `overlayClickBehavior: "none"` to ignore overlay clicks while Escape and the
+  close button still close the tour.
+  ([#435](https://github.com/nilbuild/driver.js/issues/435))
+
+### Changed
+
+- Keyboard control follows the popover buttons: arrow keys do nothing when
+  their button is hidden or disabled, and Escape does nothing when the close
+  button is disabled.
+  ([#589](https://github.com/nilbuild/driver.js/issues/589))
+- The current popover is hidden while `waitForElement` waits for the next
+  step's element, so a stale step no longer stays on screen.
+  ([#578](https://github.com/nilbuild/driver.js/issues/578))
+- Only one instance is on screen at a time. Starting a tour or highlight closes
+  any other active instance; it gets `onDeselected` and `onDestroyed` but not
+  `onDestroyStarted`.
+
+### Fixed
+
+- `destroy()` on an instance that is not active is now a no-op instead of
+  tearing down another instance's tour.
+  ([#504](https://github.com/nilbuild/driver.js/issues/504))
+- The highlighted element's own `aria-controls`, `aria-expanded` and
+  `aria-haspopup` are restored when the highlight moves on or the tour ends,
+  instead of being removed.
+  ([#495](https://github.com/nilbuild/driver.js/issues/495))
+- No more small white square between steps without an element.
+  ([#549](https://github.com/nilbuild/driver.js/issues/549))
+- `onDeselected` now fires when moving between two steps on the same element,
+  or between two steps without an element.
+- The driver-level `disableButtons` now applies to tour steps. It used to be
+  ignored during a tour. A step's own `disableButtons` still replaces it.
+
+## 1.8.0
+
+### Added
+
+- Hints: pulsing beacons that open a popover on click; overlay optional, the
+  page stays interactive. `driver.js/hints`, ~5KB gzip. [Guide](/docs/hints).
+  ([#363](https://github.com/nilbuild/driver.js/issues/363))
+- `advanceOnClick` (driver and step level) to advance the tour by clicking the
+  highlighted element itself.
+  ([#606](https://github.com/nilbuild/driver.js/issues/606))
+- `waitForElement` (driver and step level) to wait up to N ms for a step's
+  element before treating it as missing.
+  ([#606](https://github.com/nilbuild/driver.js/issues/606))
+- `sideEffects` field in package.json for better tree-shaking.
+
+### Changed
+
+- Popover internals shared between tours and hints; tour behaviour verified
+  unchanged against 1.7.0.
+- Build migrated from vite to tsdown; artifact names, exports map and CDN
+  globals unchanged, sizes within ±2%.
+
+### Fixed
+
+- `skipMissingElement`: the last reachable step now shows Done and runs
+  `onDoneClick`; step queries like `isLastStep()` account for skips.
+  ([#616](https://github.com/nilbuild/driver.js/issues/616))
+
+## 1.7.0
+
+### Added
+
+- `skipMissingElement` option (driver and step level) to skip a step whose
+  target element is specified but not in the DOM, instead of showing the
+  centered fallback popover. Element-less steps are never skipped.
+  ([#489](https://github.com/nilbuild/driver.js/issues/489),
+  [#395](https://github.com/nilbuild/driver.js/issues/395))
+- `index` on the options passed to every hook, holding the currently active
+  step index (same value as `driverObj.getActiveIndex()`).
+  ([#490](https://github.com/nilbuild/driver.js/issues/490))
+- `--driver-popover-font-family` CSS variable to set the popover font in one
+  place, without overriding each text element individually.
+  ([#607](https://github.com/nilbuild/driver.js/issues/607))
+
+### Changed
+
+- The popover title and description now render in the default font stack
+  (`"Helvetica Neue", …`) instead of the browser's default `sans-serif`. An
+  internal rule had been shadowing the intended font. Set
+  `--driver-popover-font-family` to use your own.
+
+### Fixed
+
+- Icon fonts (Material Icons, Font Awesome, etc.) placed inside a step
+  description are no longer overridden by the popover font and render correctly.
+  ([#510](https://github.com/nilbuild/driver.js/issues/510),
+  [#512](https://github.com/nilbuild/driver.js/issues/512))
+- Each `driver()` call keeps its own config, steps and state, so creating a
+  second instance no longer overwrites the first.
+  ([#571](https://github.com/nilbuild/driver.js/issues/571))
+- Popover no longer jumps when its content has images that load after render.
+
+## 1.6.0
+
+### Added
+
+- `animationDuration` config to control how long the highlight transition takes.
+  ([#104](https://github.com/nilbuild/driver.js/issues/104))
+- `allowScroll` config to lock body scroll while a tour is active.
+- `onDoneClick` hook, fired when the done button on the final step is clicked.
+  ([#500](https://github.com/nilbuild/driver.js/issues/500))
+- `data` property on a step for passing arbitrary data, accessible from hooks
+  for custom per-step logic. ([#539](https://github.com/nilbuild/driver.js/issues/539))
+
+### Changed
+
+- <span class="breaking-badge">Breaking</span> Popover footer buttons are now styled through the
+  `driver-popover-footer-btn` class instead of the `.driver-popover-footer button` selector. Buttons you add through
+  `onPopoverRender` no longer inherit the default styling automatically. Add the `driver-popover-footer-btn` class to
+  opt in, or leave it off to apply your own styles. The built-in next/previous buttons carry the class out of the box.
+  ([#555](https://github.com/nilbuild/driver.js/issues/555))
+- Custom buttons added through `onPopoverRender` now receive their own click
+  events. Only the built-in next, previous, and close buttons have their default
+  action intercepted by the library.
+- The popover exposes `driver-popover-side-*` and `driver-popover-align-*`
+  classes so you can target its position from CSS, and the arrow positioning was
+  rewritten for more accurate placement.
+
+### Fixed
+
+- Document event listener leak in `onDriverClick` that left handlers attached
+  after the tour was destroyed.
+  ([#452](https://github.com/nilbuild/driver.js/issues/452))
+- Dropped the CSS `:has()` selector for broader browser compatibility.
+  ([#586](https://github.com/nilbuild/driver.js/issues/586))
+- Positioned highlighted elements and their children (e.g. dropdown menus) no
+  longer get clipped.
+  ([#454](https://github.com/nilbuild/driver.js/issues/454),
+  [#563](https://github.com/nilbuild/driver.js/issues/563))
+- `removeChild` DOMException when re-rendering a popover whose wrapper was
+  already detached from the DOM.
+  ([#572](https://github.com/nilbuild/driver.js/issues/572))
+- Close button on a single-element `highlight()` popover did nothing when
+  clicked. It now closes the popover by default, respecting `allowClose` and any
+  custom `onCloseClick`. ([#444](https://github.com/nilbuild/driver.js/issues/444))
+
+## 1.5.0
+
+### Added
+
+- `getNextStep` method on the driver API.
+  ([#420](https://github.com/nilbuild/driver.js/issues/420))
+- `driver-popover-done-btn` class on the next button when it acts as the done
+  button on the final step. ([#610](https://github.com/nilbuild/driver.js/issues/610))
+
+### Changed
+
+- The `onDestroyed` hook now receives the final tour state.
+  ([#553](https://github.com/nilbuild/driver.js/issues/553))
+- Removed the unicode characters from the default button labels.
+
+### Fixed
+
+- The tour no longer closes when pressing the left arrow on the first step.
+  ([#564](https://github.com/nilbuild/driver.js/issues/564))
+- Removed the button text-shadow that left ghost text behind.
+  ([#605](https://github.com/nilbuild/driver.js/issues/605))
+- `onNextClick` now fires when advancing the tour through an overlay click.
+  ([#576](https://github.com/nilbuild/driver.js/issues/576))
+
+For the release notes of other versions, see the
+[GitHub releases](https://github.com/nilbuild/driver.js/releases) page.
+
+## Migrating from 0.x to 1.x
+
+Driver.js 1.x is a major release with a new API and architecture. See the
+[Migrate to 1.x](/docs/migrating-from-0x) guide for a step-by-step walkthrough
+of the import, configuration, and API changes.

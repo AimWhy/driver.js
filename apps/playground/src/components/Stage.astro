@@ -1,0 +1,63 @@
+---
+// The shared demo content every example highlights against. Examples reference
+// these elements by selector (.page-header, .buttons, #scrollable-area, ...), so
+// keep the ids/classes stable when editing — the Tailwind utilities are purely
+// cosmetic.
+---
+
+<div class="demo-container mx-auto flex max-w-[640px] flex-col text-left [&_p]:mb-4 [&_p]:leading-normal">
+  <header class="page-header mb-2.5 text-center">
+    <h1 class="text-5xl font-semibold">driver.js <sup class="text-lg font-normal">v1</sup></h1>
+    <p>A lightweight, no-dependency library to drive the user's focus across the page.</p>
+  </header>
+
+  <h2 class="mt-8 mb-2.5 text-2xl font-semibold">Highlight any element</h2>
+  <p id="large-paragraph-text">
+    Highlight anything, anywhere on the page — literally anything, including SVG portions, scrollable items and
+    off-screen elements. Pick an example from the sidebar to see it in action.
+  </p>
+
+  <div
+    class="buttons flex flex-wrap gap-2.5 [&>button]:cursor-pointer [&>button]:rounded-md [&>button]:border [&>button]:border-gray-300 [&>button]:bg-transparent [&>button]:px-4 [&>button]:py-1.5"
+  >
+    <button id="card-1" type="button">Card One</button>
+    <button id="card-2" type="button">Card Two</button>
+    <button id="card-3" type="button">Card Three</button>
+    <button id="card-4" type="button">Card Four</button>
+    <button id="card-5" type="button">Card Five</button>
+    <button id="card-6" type="button">Card Six</button>
+  </div>
+
+  <ul class="feature-list mx-2.5 mt-5 list-none leading-normal [&>li]:before:mr-2.5 [&>li]:before:content-['•']">
+    <li>Written in TypeScript</li>
+    <li>Lightweight — only ~5kb gzipped</li>
+    <li>No dependencies</li>
+    <li>MIT Licensed</li>
+  </ul>
+
+  <ul id="hooks-list" class="mx-2.5 mt-5 list-none leading-normal [&>li]:before:mr-2.5 [&>li]:before:content-['•']">
+    <li>Open the console to follow the hooks fired by an example.</li>
+  </ul>
+
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi blanditiis consectetur ea eligendi id in inventore
+    ipsa iure laudantium libero, minus molestias necessitatibus nesciunt non omnis, quasi recusandae tempore voluptates!
+  </p>
+
+  <div id="scrollable-area" class="my-12 h-[300px] overflow-auto rounded-md border border-gray-300 p-2.5">
+    <p>First — scroll down inside this box to reach the highlighted paragraph.</p>
+    <p>Second — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p id="third-scroll-paragraph">Third — even nested scrollable elements are handled correctly.</p>
+    <p>Fourth — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Fifth — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Sixth — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Seventh — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Eighth — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Ninth — Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+  </div>
+
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi blanditiis consectetur ea eligendi id in inventore
+    ipsa iure laudantium libero, minus molestias necessitatibus nesciunt non omnis, quasi recusandae tempore voluptates!
+  </p>
+</div>

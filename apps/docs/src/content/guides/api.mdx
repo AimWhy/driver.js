@@ -1,0 +1,172 @@
+---
+title: "API Reference"
+description: "Complete Driver.js API reference: every method available on the driver, hints and checklist instances, with examples."
+groupTitle: "Introduction"
+sort: 4
+---
+
+Here is the list of methods provided by `driver` when you initialize it.
+
+> **Note:** We have omitted the configuration options for brevity. Please look at the configuration section for the options. Links are provided in the description below.
+
+```javascript
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+// Look at the configuration section for the options
+// https://driverjs.com/docs/configuration#driver-configuration
+const driverObj = driver({
+  /* ... */
+});
+
+// --------------------------------------------------
+// driverObj is an object with the following methods
+// --------------------------------------------------
+
+// Start the tour using `steps` given in the configuration
+driverObj.drive(); // Starts at step 0
+driverObj.drive(4); // Starts at step 4
+
+driverObj.moveNext(); // Move to the next step
+driverObj.movePrevious(); // Move to the previous step
+driverObj.moveTo(4); // Move to the step 4
+driverObj.hasNextStep(); // Is there a next step
+driverObj.hasPreviousStep(); // Is there a previous step
+
+driverObj.isFirstStep(); // Is the current step the first step
+driverObj.isLastStep(); // Is the current step the last step
+
+driverObj.getActiveIndex(); // Gets the active step index
+
+driverObj.getActiveStep(); // Gets the active step configuration
+driverObj.getPreviousStep(); // Gets the previous step configuration
+driverObj.getNextStep(); // Gets the next step configuration
+driverObj.getActiveElement(); // Gets the active HTML element
+driverObj.getPreviousElement(); // Gets the previous HTML element
+
+// Is the tour or highlight currently active
+driverObj.isActive();
+
+// Recalculate and redraw the highlight
+driverObj.refresh();
+
+// Look at the configuration section for configuration options
+// https://driverjs.com/docs/configuration#driver-configuration
+driverObj.getConfig();
+driverObj.setConfig({
+  /* ... */
+});
+
+driverObj.setSteps([
+  /* ... */
+]); // Set the steps
+
+// Look at the state section of configuration for format of the state
+// https://driverjs.com/docs/configuration#state
+driverObj.getState();
+
+// Look at the DriveStep section of configuration for format of the step
+// https://driverjs.com/docs/configuration/#drive-step-configuration
+driverObj.highlight({
+  /* ... */
+}); // Highlight an element
+
+// Destroy the tour. The destroy hooks receive `options.reason` "api",
+// or the reason of the user action when called from inside a hook.
+// https://driverjs.com/docs/configuration#driver-configuration
+driverObj.destroy();
+```
+
+> Each `driver()` call returns its own independent instance. You can create as many as you need on the same page, and their configuration, steps, and state never overlap. Only one instance can be on screen at a time, so starting a tour or highlight on one instance closes whichever instance is currently active.
+
+## Hints
+
+Hints ship as their own entry and factory. See the [Hints guide](/docs/hints) for an introduction, and the [Hints Configuration](/docs/configuration#hints-configuration) section for the options.
+
+```javascript
+import { hints } from "driver.js/hints";
+import "driver.js/dist/hints.css";
+
+// Look at the configuration section for the options
+// https://driverjs.com/docs/configuration#hints-configuration
+const productHints = hints({
+  /* ... */
+});
+
+// -----------------------------------------------------
+// productHints is an object with the following methods
+// -----------------------------------------------------
+
+// Mount the beacons. Calling it again picks up hints
+// whose elements have appeared since.
+productHints.show();
+// Remove the beacons and listeners; show() brings them back
+productHints.hide();
+
+// Hints are addressed by their `id`, or by their
+// index in the array when no id is set.
+productHints.open("export"); // Open a hint's popover
+productHints.close(); // Close the open popover, keeping its beacon
+productHints.dismiss("export"); // Remove the hint's beacon and fire onDismiss
+productHints.restore("export"); // Bring a dismissed hint back
+productHints.restoreAll(); // Bring every dismissed hint back
+
+productHints.setHints([
+  /* ... */
+]); // Replace the hints; resets dismissals
+productHints.getHints(); // The configured hints
+productHints.getActive(); // The hint whose popover is open, if any
+
+productHints.isVisible(); // Whether the beacons are currently shown
+
+// Reposition the beacons, the open popover and the
+// overlay after layout changes
+productHints.refresh();
+```
+
+> Like `driver()`, each `hints()` call is independent: its hints, dismissals, and overlay never affect another instance or a running tour.
+
+## Checklists
+
+Checklists ship as their own entry and factory. See the [Checklists guide](/docs/checklists) for an introduction, and the [Checklist Configuration](/docs/configuration#checklist-configuration) section for the options.
+
+```javascript
+import { checklist } from "driver.js/checklist";
+import "driver.js/dist/driver.css";
+import "driver.js/dist/checklist.css";
+
+// Look at the configuration section for the options
+// https://driverjs.com/docs/configuration#checklist-configuration
+const onboarding = checklist({
+  /* ... */
+});
+
+// ---------------------------------------------------
+// onboarding is an object with the following methods
+// ---------------------------------------------------
+
+// Add the launcher to the page; hide() removes the widget
+onboarding.show();
+onboarding.hide();
+
+onboarding.open(); // Open the panel
+onboarding.close(); // Close the panel, keeping the launcher
+onboarding.toggle(); // Open or close the panel
+
+// Items are addressed by their `id`.
+onboarding.start("tour"); // Run the item's tour, link or action
+onboarding.complete("github"); // Tick an item
+onboarding.uncomplete("github"); // Untick an item
+onboarding.reset(); // Untick every item
+
+// Check every item's completeWhen again
+onboarding.refresh();
+
+onboarding.getProgress(); // { completed: ["tour"], done: 1, total: 4 }
+onboarding.getItems(); // The configured items
+
+onboarding.isVisible(); // Whether the widget is on the page
+onboarding.isOpen(); // Whether the panel is open
+```
+
+> Tours started from a checklist run like any other tour, so starting one closes whichever tour is currently active. Items that are done can still be clicked to run their tour again.
