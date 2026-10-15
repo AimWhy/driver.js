@@ -10,6 +10,21 @@ ships, these entries move under a versioned heading.
 
 ## Unreleased
 
+### Added
+
+- `launcher: false` on checklists drops the floating launcher, for pages
+  that open the panel from their own button with `open()` or `toggle()`.
+  Closing the panel hands focus back to whatever opened it.
+
+### Fixed
+
+- Hints, and popovers of tour steps, whose element is inside an open
+  `<dialog>` now render inside that dialog, so they show above a modal
+  opened with `showModal()` instead of behind it.
+  ([#625](https://github.com/nilbuild/driver.js/issues/625))
+- Clicking the popover no longer throws when the event's target is a text
+  node. ([#626](https://github.com/nilbuild/driver.js/issues/626))
+
 ## 1.10.0
 
 ### Added
