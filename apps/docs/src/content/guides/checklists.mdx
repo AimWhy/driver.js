@@ -109,7 +109,8 @@ the link is clicked. You can also tick an item directly with
 Some tasks can't be detected, like "Watch the intro video" or "Read the
 guidelines". Set `allowManualComplete` and the check circle becomes a button:
 users tick an item off themselves, or untick it if they clicked by mistake.
-Clicking the item's text still runs its tour, link or action.
+Clicking the item's text still runs its tour, link or action; on an item with
+none of these, it ticks the item too.
 
 <ChecklistSample
   idPrefix="checklist-manual"
@@ -148,7 +149,6 @@ const onboarding = checklist({
   onProgress: ({ completed, done, total }) => {
     localStorage.setItem("onboarding", JSON.stringify(completed));
   },
-  onComplete: () => onboarding.hide(),
 });
 
 onboarding.show();
@@ -156,6 +156,54 @@ onboarding.show();
 
 Since progress is plain data, your backend can tick items too: pass the ids of
 tasks it knows are done in `completed`.
+
+## When everything is done
+
+Once every item is done, the checklist can show a different title, description
+and launcher text, for a short "well done" message. If an item is unticked, it
+switches back:
+
+<ChecklistSample
+  idPrefix="checklist-done"
+  buttonText="Show Finished Checklist"
+  config={{
+    completed: ["tour", "github", "invite"],
+    completeTitle: "You're all set! 🎉",
+    completeDescription: "Nice work. You're ready to go.",
+    completeLauncherText: "All done",
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  completeTitle: "You're all set! 🎉",
+  completeDescription: "Nice work. You're ready to go.",
+  completeLauncherText: "All done",
+  items,
+});
+```
+
+This demo starts with three of four items done; click the last one.
+
+The checklist doesn't hide itself when it's done, since what happens next is up
+to your app. To hide it right away, call `hide()` from `onComplete`. On later
+visits, check the saved progress and don't show it at all:
+
+```js
+const onboarding = checklist({
+  id: "onboarding",
+  items,
+  completed: savedProgress,
+  onComplete: () => setTimeout(() => onboarding.hide(), 3000),
+});
+
+const { done, total } = onboarding.getProgress();
+if (done < total) {
+  onboarding.show();
+}
+```
 
 ## Tracking events
 
@@ -187,71 +235,21 @@ This is the theme used on the driver.js homepage:
 <ChecklistSample
   idPrefix="checklist-theme"
   buttonText="Show Themed Checklist"
-  config={{ className: "driverjs-checklist-theme" }}
+  config={{ className: "checklist-brutalist" }}
   client:load
 />
-
-```css
-.driver-checklist.driverjs-checklist-theme {
-  --driver-checklist-color: #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-launcher {
-  border: 2px solid #000;
-  border-radius: 12px;
-  background-color: #fde047;
-  color: #000;
-  box-shadow: 3px 3px 0 0 #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-launcher:hover {
-  background-color: #facc15;
-}
-
-.driverjs-checklist-theme .driver-checklist-launcher-count {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background-color: #000;
-  color: #fde047;
-}
-
-.driverjs-checklist-theme .driver-checklist-panel {
-  border: 2px solid #000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0 0 #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-header {
-  border-bottom: 2px solid #000;
-  background-color: #fde047;
-}
-
-.driverjs-checklist-theme .driver-checklist-items {
-  padding-top: 7px;
-}
-
-.driverjs-checklist-theme .driver-checklist-progress-bar {
-  height: 10px;
-  border: 2px solid #000;
-  background-color: #fff;
-}
-
-.driverjs-checklist-theme .driver-checklist-progress-fill {
-  border-radius: 0;
-}
-
-.driverjs-checklist-theme .driver-checklist-check {
-  border-color: #000;
-}
-```
 
 ```js
 checklist({
   id: "onboarding",
-  className: "driverjs-checklist-theme",
+  className: "checklist-brutalist",
   items,
 });
 ```
+
+See [Checklist Themes](/docs/checklist-themes) for its CSS and more themes to
+copy: dark, gradient header, a GIF banner, numbered steps, a progress ring and
+more.
 
 The parts are `driver-checklist-launcher`, `-launcher-text`, `-launcher-count`,
 `-panel`, `-header`, `-title`, `-description`, `-close-btn`, `-progress`,
@@ -279,16 +277,45 @@ It colors the progress bar, the ticks and the focus rings:
 }
 ```
 
-### Position and text
+### Position
 
 The widget sits in the bottom-right corner by default. Use `position` to move
-it to the bottom left, and change any of its text:
+it to any corner: `"bottom-right"`, `"bottom-left"`, `"top-right"` or
+`"top-left"`. In the top corners, the panel opens below the launcher.
+
+<ChecklistSample
+  idPrefix="checklist-position"
+  positions={["top-left", "top-right", "bottom-left", "bottom-right"]}
+  client:load
+/>
+
+`offset` sets the distance in pixels from the screen edges, for example to make
+room for a chat bubble in the same corner:
+
+```js
+checklist({
+  id: "onboarding",
+  position: "bottom-right",
+  offset: { x: 20, y: 90 },
+  items,
+});
+```
+
+The default is 20 pixels, or 12 on phones. You can also set it in CSS with the
+`--driver-checklist-offset-x` and `--driver-checklist-offset-y` variables.
+
+On screens narrower than 480 pixels, the panel spans the width of the screen
+with even margins, and the launcher stays in its corner. The widget also keeps
+clear of the notch and the home bar on phones that have them.
+
+### Text
+
+Change any of the widget's text:
 
 <ChecklistSample
   idPrefix="checklist-text"
-  buttonText="Show Left Checklist"
+  buttonText="Show Custom Text"
   config={{
-    position: "bottom-left",
     title: "Welcome aboard 👋",
     description: "Finish these to unlock your workspace.",
     launcherText: "Setup guide",
@@ -301,7 +328,6 @@ it to the bottom left, and change any of its text:
 ```js
 checklist({
   id: "onboarding",
-  position: "bottom-left",
   title: "Welcome aboard 👋",
   description: "Finish these to unlock your workspace.",
   launcherText: "Setup guide",
@@ -334,15 +360,26 @@ const onboarding = checklist({
   description: "Four steps to your first project.",
   launcherText: "Get started", // Defaults to the title
 
-  // Progress text; {{done}} and {{total}} are replaced.
+  // Shown instead of the texts above once every item is done.
+  completeTitle: "You're all set! 🎉",
+  completeDescription: "Nice work. You're ready to go.",
+  completeLauncherText: "All done",
+
+  // Progress text; {{done}}, {{total}}, {{remaining}} and
+  // {{percent}} are replaced.
   progressText: "{{done}} of {{total}}",
 
   // The count on the launcher, same placeholders.
   // An empty string hides it.
   launcherProgressText: "{{done}}/{{total}}",
 
-  // Corner of the screen: "bottom-right" (default) or "bottom-left".
+  // Corner of the screen: "bottom-right" (default),
+  // "bottom-left", "top-right" or "top-left".
   position: "bottom-right",
+
+  // Distance in pixels from the screen edges.
+  // Defaults to 20, or 12 on phones.
+  offset: { x: 20, y: 20 },
 
   // Extra class on the widget.
   className: "my-checklist",

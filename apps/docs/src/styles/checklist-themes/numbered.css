@@ -1,0 +1,31 @@
+.driver-checklist.checklist-numbered .driver-checklist-items {
+  counter-reset: checklist-step;
+}
+
+.driver-checklist.checklist-numbered .driver-checklist-item {
+  counter-increment: checklist-step;
+}
+
+/* The circle shows the step number until the item is done. */
+.driver-checklist.checklist-numbered .driver-checklist-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-top: -1px;
+  border-color: #d4d4d4;
+  font-size: 12px;
+  font-weight: 600;
+  color: #525252;
+}
+
+.driver-checklist.checklist-numbered
+  .driver-checklist-item:not(.driver-checklist-item-done)
+  .driver-checklist-check::after {
+  content: counter(checklist-step);
+}
+
+.driver-checklist.checklist-numbered .driver-checklist-item-done .driver-checklist-check {
+  border-color: var(--driver-checklist-color, #2d2d2d);
+}

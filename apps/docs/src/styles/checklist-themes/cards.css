@@ -1,0 +1,45 @@
+.driver-checklist.checklist-cards {
+  --driver-checklist-color: #16a34a;
+}
+
+.driver-checklist.checklist-cards .driver-checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 14px 14px;
+}
+
+.driver-checklist.checklist-cards .driver-checklist-item {
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+}
+
+/* A chevron on items that do something when clicked. */
+.driver-checklist.checklist-cards
+  .driver-checklist-item:has(button.driver-checklist-item-trigger, a.driver-checklist-item-trigger)::after {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border: solid #a3a3a3;
+  border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+}
+
+.driver-checklist.checklist-cards
+  .driver-checklist-item:has(button.driver-checklist-item-trigger:hover, a.driver-checklist-item-trigger:hover) {
+  border-color: #d4d4d4;
+  background-color: #fafafa;
+}
+
+.driver-checklist.checklist-cards .driver-checklist-item-done {
+  border-color: #bbf7d0;
+  background-color: #f0fdf4;
+}
+
+.driver-checklist.checklist-cards .driver-checklist-item-done .driver-checklist-item-title {
+  text-decoration: none;
+}

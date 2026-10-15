@@ -1,0 +1,42 @@
+.driver-checklist.checklist-compact .driver-checklist-launcher {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+@media (min-width: 481px) {
+  .driver-checklist.checklist-compact .driver-checklist-panel {
+    width: 260px;
+  }
+}
+
+.driver-checklist.checklist-compact .driver-checklist-header {
+  padding: 12px 14px 8px;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-title {
+  font-size: 15px;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-progress {
+  margin-top: 8px;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-items {
+  padding: 0 6px 6px;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-item {
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-item-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.driver-checklist.checklist-compact .driver-checklist-check {
+  width: 14px;
+  height: 14px;
+}

@@ -11,8 +11,8 @@ import { ExampleButton } from "./ExampleButton";
   <ExampleButton id="async-tour" text="Async Tour" />
   <ExampleButton id="no-element" text="No Element" />
   <ExampleButton id="confirm-on-exit" text="Confirm on Exit" />
-  <ExampleButton id="track-completion" text="Track Completion" />
   <ExampleButton id="onboarding-checklist" text="Onboarding Checklist" />
+  <ExampleButton id="compact-checklist" text="Compact Checklist" />
   <ExampleButton id="show-progress" text="Show Progress" />
   <ExampleButton id="simple-element-highlight" text="Simple Highlight" />
   <ExampleButton id="simple-element-highlight-popover" text="Highlight with Popover" />
@@ -32,9 +32,11 @@ import { ExampleButton } from "./ExampleButton";
   import { checklist } from "driver.js/checklist";
   import "driver.js/dist/driver.css";
   import "driver.js/dist/checklist.css";
+  import "../styles/checklist-themes/compact.css";
   import { mountDummyElement, removeDummyElement } from "../lib/dummyElement";
 
   let onboarding;
+  let launch;
 
   function markDone(btn) {
     btn.querySelector("[data-left-at]")?.remove();
@@ -66,14 +68,6 @@ import { ExampleButton } from "./ExampleButton";
       badge.textContent = `left at ${index + 1}/${total}`;
     };
   }
-
-  const REASON_LABELS = {
-    close: "the close button",
-    escape: "the Escape key",
-    overlay: "a click on the overlay",
-    replaced: "another tour starting",
-    api: "code",
-  };
 
   const demoTourButton = document.querySelector("[data-demo-tour]");
   demoTourButton.addEventListener("click", () => {
@@ -540,114 +534,15 @@ import { ExampleButton } from "./ExampleButton";
     });
   });
 
-  const trackCompletionBtn = document.getElementById('track-completion');
-
-  function showCompletionSummary(tour, reason, index) {
-    const total = tour.getConfig().steps.length;
-    const summary = driver({ popoverClass: "driverjs-theme" });
-
-    if (reason === "done") {
-      markDone(trackCompletionBtn);
-      summary.highlight({
-        element: "[data-example-btns]",
-        popover: {
-          title: "Tour completed",
-          description: "onDestroyed got <code>reason: \"done\"</code>. This is where you mark onboarding as complete so the user never sees it again.",
-          side: "top",
-          align: "start",
-          showButtons: ["close"],
-        },
-      });
-      return;
-    }
-
-    trackEnd(trackCompletionBtn)(undefined, undefined, { reason, index, config: tour.getConfig() });
-
-    summary.highlight({
-      element: "[data-example-btns]",
-      popover: {
-        title: `You left at step ${index + 1} of ${total}`,
-        description: `onDestroyed got <code>reason: "${reason}"</code> (${REASON_LABELS[reason] ?? reason}). Log it to see where users drop off, or let them pick up where they left.`,
-        side: "top",
-        align: "start",
-        showButtons: ["close"],
-        onPopoverRender: popover => {
-          const resume = document.createElement("button");
-          resume.className = "driver-popover-footer-btn";
-          resume.innerText = "Resume tour";
-          resume.dataset.resume = "";
-          popover.footerButtons.appendChild(resume);
-          popover.footer.style.display = "flex";
-          popover.previousButton.style.display = "none";
-          popover.nextButton.style.display = "none";
-
-          resume.addEventListener("click", () => tour.drive(index));
-        },
-      },
-    });
-  }
-
-  trackCompletionBtn.addEventListener("click", () => {
-    const driverObj = driver({
-      animate: true,
-      popoverClass: "driverjs-theme",
-      showProgress: true,
-      steps: [
-        {
-          element: "[data-examples-heading]",
-          popover: {
-            title: "Finished or Left?",
-            description: "Driver.js tells you why a tour ended. Finish this tour, or leave it any way you like: close button, Escape or a click outside.",
-            side: "bottom",
-            align: "start"
-          }
-        },
-        {
-          element: "#track-completion",
-          popover: {
-            title: "Every Example Tracks It",
-            description: "Examples you finish get struck through. Leave one early and its button shows the step you left at instead.",
-            side: "bottom",
-            align: "start"
-          }
-        },
-        {
-          element: "[data-examples-tagline]",
-          popover: {
-            title: "Know Your Drop-off",
-            description: "<code>onDestroyed</code> receives <code>reason</code>: done, close, escape, overlay, replaced or api, plus the step index.",
-            side: "bottom",
-            align: "start"
-          }
-        },
-        {
-          popover: {
-            title: "Last Step",
-            description: "Press done to finish, or close it now to see the difference.",
-          }
-        },
-      ],
-      onDestroyed: (element, step, { reason, index }) => {
-        if (reason === "replaced") {
-          return;
-        }
-
-        showCompletionSummary(driverObj, reason, index);
-      },
-    });
-
-    driverObj.drive();
-  });
-
   const onboardingChecklistBtn = document.getElementById("onboarding-checklist");
 
   function createOnboarding() {
     return checklist({
       id: "homepage-onboarding",
-      className: "driverjs-checklist-theme",
+      className: "checklist-brutalist",
       allowManualComplete: true,
       title: "Get to know driver.js",
-      description: "Three quick ways to try it out.",
+      description: "Four quick ways to try it out.",
       items: [
         {
           id: "welcome-tour",
@@ -669,6 +564,12 @@ import { ExampleButton } from "./ExampleButton";
           },
         },
         {
+          id: "try-hints",
+          title: "Try feature hints",
+          description: "Pulsing dots at the top of the page.",
+          action: () => document.dispatchEvent(new CustomEvent("driver-docs:show-hints")),
+        },
+        {
           id: "finish-example",
           title: "Finish any example",
           description: "Try any example on this page.",
@@ -687,6 +588,7 @@ import { ExampleButton } from "./ExampleButton";
   }
 
   function showOnboarding() {
+    launch?.hide();
     onboarding = onboarding || createOnboarding();
     onboarding.show();
     onboarding.open();
@@ -703,4 +605,34 @@ import { ExampleButton } from "./ExampleButton";
 
   // The hero's "Show Demo" menu opens the same checklist.
   document.addEventListener("driver-docs:show-checklist", showOnboarding);
+
+  const compactChecklistBtn = document.getElementById("compact-checklist");
+
+  compactChecklistBtn.addEventListener("click", () => {
+    if (launch?.isOpen()) {
+      launch.close();
+      return;
+    }
+
+    onboarding?.hide();
+    launch =
+      launch ||
+      checklist({
+        id: "homepage-launch",
+        className: "checklist-compact",
+        allowManualComplete: true,
+        title: "Launch checklist",
+        launcherText: "Launch",
+        launcherProgressText: "{{remaining}} left",
+        items: [
+          { id: "install", title: "Install driver.js" },
+          { id: "highlight", title: "Highlight a button" },
+          { id: "tour", title: "Write your first tour" },
+          { id: "ship", title: "Ship it to your users" },
+        ],
+        onComplete: () => markDone(compactChecklistBtn),
+      });
+    launch.show();
+    launch.open();
+  });
 </script>

@@ -253,46 +253,20 @@ example below is the theme used on the driver.js homepage:
 <ChecklistSample
   idPrefix="styling-checklist-theme"
   buttonText="Themed Checklist"
-  config={{ className: "driverjs-checklist-theme" }}
+  config={{ className: "checklist-brutalist" }}
   client:load
 />
 
 ```js
 checklist({
   id: "onboarding",
-  className: "driverjs-checklist-theme",
+  className: "checklist-brutalist",
   items,
 });
 ```
 
-```css
-.driver-checklist.driverjs-checklist-theme {
-  --driver-checklist-color: #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-launcher {
-  border: 2px solid #000;
-  border-radius: 12px;
-  background-color: #fde047;
-  color: #000;
-  box-shadow: 3px 3px 0 0 #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-launcher:hover {
-  background-color: #facc15;
-}
-
-.driverjs-checklist-theme .driver-checklist-panel {
-  border: 2px solid #000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0 0 #000;
-}
-
-.driverjs-checklist-theme .driver-checklist-header {
-  border-bottom: 2px solid #000;
-  background-color: #fde047;
-}
-```
+Its CSS, and more themes ready to copy, are on the
+[Checklist Themes](/docs/checklist-themes) page.
 
 ### Class Names
 
@@ -300,7 +274,7 @@ These are the classes you can target:
 
 ```css
 .driver-checklist {}                  /* The widget, positioned in a corner */
-.driver-checklist-bottom-right {}     /* or -bottom-left, from `position` */
+.driver-checklist-bottom-right {}     /* or -bottom-left, -top-right, -top-left */
 .driver-checklist-complete {}         /* Added once every item is done */
 
 .driver-checklist-launcher {}         /* The button that opens the panel */
@@ -327,5 +301,8 @@ These are the classes you can target:
 .driver-checklist-item-description {}
 ```
 
-The font follows the popover's `--driver-popover-font-family` variable. See the
+The widget also sets `--driver-checklist-progress` to the progress as a
+percentage, for progress designs drawn in CSS, like the
+[progress ring](/docs/checklist-themes#progress-ring). The font follows the
+popover's `--driver-popover-font-family` variable. See the
 [Checklists guide](/docs/checklists#customizing) for position and text options.

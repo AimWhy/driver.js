@@ -225,7 +225,17 @@ type Config = {
 
 > `options.index`: Every hook receives the zero-based index of the currently active step in `options.index` (equivalent to `driverObj.getActiveIndex()`), or `undefined` when driving a single highlight rather than a `steps` array. Note that `index` always reflects the _active_ step, so inside `onDeselected` (which fires for the step being left during a transition) it points at the step being moved to, not the one being deselected.
 
-> `options.reason`: `onDestroyStarted`, `onDestroyed` and the `onDeselected` that runs when the tour ends receive why it ended: `"done"` (moved past the last step, including when the remaining steps are skipped as missing), `"close"`, `"escape"`, `"overlay"`, `"replaced"` (another driver instance started) or `"api"` (`destroy()`, or a `moveTo()` / `movePrevious()` that left the steps, from your own code). It is not set on the other hooks, or on the `onDeselected` that runs between steps. A `destroy()` you call from a hook (`onDestroyStarted`, `onCloseClick`, `onNextClick` / `onDoneClick` on the last step, an `overlayClickBehavior` function) keeps the reason of the user action that started it, so `onDestroyStarted: (el, step, { reason }) => { if (reason === "done" || confirm("Leave?")) driverObj.destroy(); }` only asks when the user leaves early. The type is exported as `DestroyReason`.
+> `options.reason`: `onDestroyStarted`, `onDestroyed` and the `onDeselected` that runs when the tour ends receive why it ended: `"done"` (moved past the last step, including when the remaining steps are skipped as missing), `"close"`, `"escape"`, `"overlay"`, `"replaced"` (another driver instance started) or `"api"` (`destroy()`, or a `moveTo()` / `movePrevious()` that left the steps, from your own code). It is not set on the other hooks, or on the `onDeselected` that runs between steps. A `destroy()` you call from a hook (`onDestroyStarted`, `onCloseClick`, `onNextClick` / `onDoneClick` on the last step, an `overlayClickBehavior` function) keeps the reason of the user action that started it. This hook only asks when the user leaves early:
+>
+> ```js
+> onDestroyStarted: (el, step, { reason }) => {
+>   if (reason === "done" || confirm("Leave?")) {
+>     driverObj.destroy();
+>   }
+> };
+> ```
+>
+> The type is exported as `DestroyReason`.
 
 ## Popover Configuration
 
@@ -535,16 +545,30 @@ type ChecklistConfig = {
   description?: string;
   launcherText?: string;
 
-  // Progress text next to the bar; {{done}} and {{total}}
-  // are replaced. (default: "{{done}} of {{total}}")
+  // Shown instead of the title, description and launcher
+  // text once every item is done, and swapped back if an
+  // item is unticked. An empty completeDescription hides
+  // the description.
+  completeTitle?: string;
+  completeDescription?: string;
+  completeLauncherText?: string;
+
+  // Progress text next to the bar; {{done}}, {{total}},
+  // {{remaining}} and {{percent}} are replaced.
+  // (default: "{{done}} of {{total}}")
   progressText?: string;
 
   // The count on the launcher, with the same placeholders.
   // An empty string hides it. (default: "{{done}}/{{total}}")
   launcherProgressText?: string;
 
-  // Corner of the screen. (default: "bottom-right")
-  position?: "bottom-right" | "bottom-left";
+  // Corner of the screen. In the top corners the panel
+  // opens below the launcher. (default: "bottom-right")
+  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+
+  // Distance in pixels from the screen edges.
+  // (default: 20, or 12 on screens narrower than 480px)
+  offset?: { x?: number; y?: number };
 
   // Extra class on the widget.
   className?: string;

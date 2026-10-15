@@ -1,0 +1,271 @@
+---
+title: "Checklist Themes"
+description: "Ready-made themes for Driver.js checklists: dark mode, gradient header, GIF banner, numbered steps, progress ring, cards, compact and a completion celebration. Copy the CSS and go."
+groupTitle: "Examples"
+sort: 10
+---
+
+import { Code } from "astro:components";
+import { ChecklistSample } from "../../components/ChecklistSample.tsx";
+
+import midnightCss from "../../styles/checklist-themes/midnight.css?raw";
+import gradientCss from "../../styles/checklist-themes/gradient.css?raw";
+import mediaCss from "../../styles/checklist-themes/media.css?raw";
+import numberedCss from "../../styles/checklist-themes/numbered.css?raw";
+import ringCss from "../../styles/checklist-themes/ring.css?raw";
+import cardsCss from "../../styles/checklist-themes/cards.css?raw";
+import compactCss from "../../styles/checklist-themes/compact.css?raw";
+import celebrationCss from "../../styles/checklist-themes/celebration.css?raw";
+import brutalistCss from "../../styles/checklist-themes/brutalist.css?raw";
+
+import "../../styles/checklist-themes/midnight.css";
+import "../../styles/checklist-themes/gradient.css";
+import "../../styles/checklist-themes/media.css";
+import "../../styles/checklist-themes/numbered.css";
+import "../../styles/checklist-themes/ring.css";
+import "../../styles/checklist-themes/cards.css";
+import "../../styles/checklist-themes/compact.css";
+import "../../styles/checklist-themes/celebration.css";
+
+export const items = [
+  { id: "profile", title: "Complete your profile", description: "Add a photo and your role.", kind: "action" },
+  { id: "tour", title: "Take the product tour", description: "Learn the basics in two minutes.", kind: "tour" },
+  { id: "invite", title: "Invite your team", description: "Everything is better together.", kind: "action" },
+  { id: "docs", title: "Read the docs", kind: "action" },
+];
+
+export const shortItems = items.map(({ description, ...item }) => item);
+
+Each theme below is plain CSS on top of the default
+[checklist](/docs/checklists) styles. To use one, copy its CSS into your
+stylesheet, then pass its class name to the checklist:
+
+```js
+import { checklist } from "driver.js/checklist";
+import "driver.js/dist/driver.css";
+import "driver.js/dist/checklist.css";
+import "./checklist-theme.css"; // The CSS you copied
+
+checklist({
+  id: "onboarding",
+  className: "checklist-gradient",
+  items,
+}).show();
+```
+
+The themes only change how the checklist looks, so you can mix their rules or
+use one as a starting point for your own. See [Styling](/docs/styling#class-names)
+for every class name you can target.
+
+## Gradient Header
+
+A bold, colored header that carries your brand. The launcher turns into a
+gradient pill.
+
+<ChecklistSample
+  idPrefix="theme-gradient"
+  bare
+  items={items}
+  config={{ className: "checklist-gradient", title: "Welcome aboard 👋" }}
+  client:load
+/>
+
+<Code code={gradientCss} lang="css" theme="monokai" />
+
+## Cards
+
+Each item in its own card, with a chevron on the ones that do something. Done
+items turn green.
+
+<ChecklistSample
+  idPrefix="theme-cards"
+  bare
+  items={items}
+  config={{ className: "checklist-cards", completed: ["profile"] }}
+  client:load
+/>
+
+<Code code={cardsCss} lang="css" theme="monokai" />
+
+## Numbered Steps
+
+Numbers instead of empty circles, for checklists meant to be done in order.
+CSS counters number the items, so there is nothing to add to the items
+themselves.
+
+<ChecklistSample
+  idPrefix="theme-numbered"
+  bare
+  items={items}
+  config={{ className: "checklist-numbered" }}
+  client:load
+/>
+
+<Code code={numberedCss} lang="css" theme="monokai" />
+
+## Progress Ring
+
+A ring around the launcher that fills up as items are done, with the number of
+items left inside it. The checklist sets `--driver-checklist-progress` to the
+progress as a percentage for the ring, `{{remaining}}` puts the count inside it,
+and `{{percent}}` shows the percentage in the panel:
+
+<ChecklistSample
+  idPrefix="theme-ring"
+  bare
+  items={items}
+  config={{
+    className: "checklist-ring",
+    completed: ["profile"],
+    progressText: "{{percent}}% complete",
+    launcherProgressText: "{{remaining}}",
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  className: "checklist-ring",
+  progressText: "{{percent}}% complete",
+  launcherProgressText: "{{remaining}}",
+  items,
+});
+```
+
+<Code code={ringCss} lang="css" theme="monokai" />
+
+## Compact
+
+A small checklist that stays out of the way, for items that don't need a
+description. The launcher counts what is left with `{{remaining}}`:
+
+<ChecklistSample
+  idPrefix="theme-compact"
+  bare
+  items={shortItems}
+  config={{
+    className: "checklist-compact",
+    title: "Setup",
+    description: "",
+    launcherText: "Setup",
+    launcherProgressText: "{{remaining}} left",
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  className: "checklist-compact",
+  title: "Setup",
+  launcherProgressText: "{{remaining}} left",
+  items, // Titles only
+});
+```
+
+<Code code={compactCss} lang="css" theme="monokai" />
+
+## GIF Banner
+
+An image, GIF or animated illustration above the title, to make the welcome
+feel friendly. The description accepts HTML, so the image goes there, and the
+CSS moves it above the title:
+
+<ChecklistSample
+  idPrefix="theme-media"
+  bare
+  items={items}
+  config={{
+    className: "checklist-media",
+    title: "Welcome to Foxbase",
+    description: '<img src="/fox-gif.gif" alt="" /><p>Four quick steps to get you going.</p>',
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  className: "checklist-media",
+  title: "Welcome to Foxbase",
+  description: '<img src="/welcome.gif" alt="" /><p>Four quick steps to get you going.</p>',
+  items,
+});
+```
+
+<Code code={mediaCss} lang="css" theme="monokai" />
+
+## Midnight
+
+A dark theme for dark apps, with a violet accent.
+
+<ChecklistSample
+  idPrefix="theme-midnight"
+  bare
+  items={items}
+  config={{ className: "checklist-midnight" }}
+  client:load
+/>
+
+<Code code={midnightCss} lang="css" theme="monokai" />
+
+## Celebration
+
+A finished state that rewards the user. Once every item is done, the checklist
+shows `completeTitle` and `completeDescription`, the launcher shows
+`completeLauncherText`, and the CSS turns it green. This demo starts with three
+of four items done, so click the last one to see it.
+
+<ChecklistSample
+  idPrefix="theme-celebration"
+  bare
+  items={items}
+  config={{
+    className: "checklist-celebration",
+    completed: ["profile", "tour", "invite"],
+    completeTitle: "You're all set! 🎉",
+    completeDescription: "Nice work. You're ready to go.",
+    completeLauncherText: "All done",
+  }}
+  client:load
+/>
+
+```js
+checklist({
+  id: "onboarding",
+  className: "checklist-celebration",
+  completeTitle: "You're all set! 🎉",
+  completeDescription: "Nice work. You're ready to go.",
+  completeLauncherText: "All done",
+  items,
+});
+```
+
+<Code code={celebrationCss} lang="css" theme="monokai" />
+
+For confetti or a "You did it" modal, use the `onComplete` hook. It fires once
+when the last item is done:
+
+```js
+checklist({
+  id: "onboarding",
+  items,
+  onComplete: () => confetti(),
+});
+```
+
+## Brutalist
+
+The theme of the driver.js homepage: thick borders, hard shadows and a yellow
+header.
+
+<ChecklistSample
+  idPrefix="theme-brutalist"
+  bare
+  items={items}
+  config={{ className: "checklist-brutalist" }}
+  client:load
+/>
+
+<Code code={brutalistCss} lang="css" theme="monokai" />

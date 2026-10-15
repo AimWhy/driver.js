@@ -17,14 +17,23 @@ ships, these entries move under a versioned heading.
   action, and are ticked when the user finishes the tour, or by
   `completeWhen` and `complete()`, or by the user with `allowManualComplete`.
   Progress comes in through `completed` and goes out through `onProgress`;
-  `onEvent` reports everything for analytics. See the
-  [Checklists guide](/docs/checklists).
+  `onEvent` reports everything for analytics. It sits in any corner of the
+  screen (`position`, `offset`), adapts to phones, and can show a different
+  title and launcher text once everything is done. See the
+  [Checklists guide](/docs/checklists), and
+  [Checklist Themes](/docs/checklist-themes) for ready-made themes.
 - `reason` in the options of `onDestroyStarted`, `onDestroyed` and the
   `onDeselected` that runs on destroy, telling apart a finished tour
   (`"done"`) from one that was closed (`"close"`, `"escape"`, `"overlay"`),
   replaced by another instance (`"replaced"`) or ended from code (`"api"`).
   A `destroy()` called from a hook keeps the reason of the user action that
   started it. The `DestroyReason` and `HookOpts` types are exported.
+
+### Changed
+
+- The popover's close button only darkens for keyboard focus
+  (`:focus-visible`), so it no longer opens dark after a tour is started with
+  a mouse click.
 
 ## 1.9.0
 

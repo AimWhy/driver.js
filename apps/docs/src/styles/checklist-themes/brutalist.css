@@ -1,0 +1,74 @@
+/* The theme of the driver.js homepage. */
+.driver-checklist.checklist-brutalist {
+  --driver-checklist-color: #000;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-launcher {
+  padding: 10px 16px;
+  border: 2px solid #000;
+  border-radius: 12px;
+  background-color: #fde047;
+  color: #000;
+  box-shadow: 3px 3px 0 0 #000;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-launcher:hover {
+  background-color: #facc15;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-launcher:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #000;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-launcher-count {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background-color: #000;
+  color: #fde047;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-panel {
+  border: 2px solid #000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 0 #000;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-header {
+  border-bottom: 2px solid #000;
+  background-color: #fde047;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-title {
+  font-weight: 700;
+  color: #000;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-items {
+  padding-top: 7px;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-description,
+.driver-checklist.checklist-brutalist .driver-checklist-progress-text,
+.driver-checklist.checklist-brutalist .driver-checklist-close-btn {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-progress-bar {
+  height: 10px;
+  border: 2px solid #000;
+  background-color: #fff;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-progress-fill {
+  border-radius: 0;
+}
+
+.driver-checklist.checklist-brutalist .driver-checklist-check {
+  border-color: #000;
+}
+
+.driver-checklist.checklist-brutalist
+  .driver-checklist-item:has(button.driver-checklist-item-trigger:hover, a.driver-checklist-item-trigger:hover) {
+  background-color: #fef9c3;
+}

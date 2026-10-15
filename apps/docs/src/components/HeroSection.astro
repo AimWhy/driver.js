@@ -39,7 +39,7 @@ import Container from "./Container.astro";
             >
               <button
                 data-demo-tour
-                class="cursor-pointer px-7 py-2.5 md:py-3 text-lg md:text-xl font-semibold hover:bg-gray-700 focus:outline-none focus-visible:outline-none"
+                class="flex-1 cursor-pointer px-7 py-2.5 md:py-3 text-lg md:text-xl font-semibold hover:bg-gray-700 focus:outline-none focus-visible:outline-none"
               >
                 Show Demo
               </button>
@@ -287,6 +287,12 @@ import Container from "./Container.astro";
         runHighlight();
       });
     }
+
+    // Started from the homepage checklist, which can be anywhere down the page.
+    document.addEventListener("driver-docs:show-hints", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      runHints();
+    });
 
     const checklistItem = split.querySelector('[data-demo-item="checklist"]');
     if (checklistItem) {

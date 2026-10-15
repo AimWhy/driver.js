@@ -6,7 +6,7 @@ import "./checklist.css";
 
 export type { DestroyReason } from "driver.js";
 
-export type ChecklistPosition = "bottom-right" | "bottom-left";
+export type ChecklistPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left";
 
 export type ChecklistItemHook = (item: ChecklistItem, opts: { checklist: Checklist }) => void;
 
@@ -67,10 +67,19 @@ export type ChecklistConfig = {
   title?: string;
   description?: string;
   launcherText?: string;
+
+  // Shown instead of the texts above once every item is done, and swapped
+  // back if an item is unticked.
+  completeTitle?: string;
+  completeDescription?: string;
+  completeLauncherText?: string;
+
   progressText?: string;
   // The count on the launcher; an empty string hides it.
   launcherProgressText?: string;
   position?: ChecklistPosition;
+  // Distance in pixels from the screen edges. (default: 20, 12 on phones)
+  offset?: { x?: number; y?: number };
   className?: string;
 
   // Lets users tick items off, or untick them, with the check circle, for
@@ -110,6 +119,8 @@ type ChecklistDOM = {
   progressText: HTMLElement;
   progressFill: HTMLElement;
   list: HTMLElement;
+  title: HTMLElement;
+  description: HTMLElement;
   launcher: HTMLButtonElement;
   launcherText: HTMLElement;
   launcherCount: HTMLElement;
@@ -242,9 +253,12 @@ export function checklist(config: ChecklistConfig): Checklist {
     trigger.appendChild(status);
 
     // A plain check circle is part of the row's click target, like the text.
+    // On a row with nothing to start, the text ticks it like the circle does.
     const check = createCheck(item);
     if (check instanceof HTMLSpanElement && isInteractive) {
       check.addEventListener("click", () => trigger.click());
+    } else if (check instanceof HTMLButtonElement && !isInteractive) {
+      trigger.addEventListener("click", () => check.click());
     }
 
     const entry = document.createElement("li");
@@ -270,16 +284,54 @@ export function checklist(config: ChecklistConfig): Checklist {
       entry.querySelector("button.driver-checklist-check")?.setAttribute("aria-pressed", `${isDone}`);
     });
 
-    const format = (text: string) => text.replace("{{done}}", `${done}`).replace("{{total}}", `${total}`);
+    const percent = total ? Math.round((done / total) * 100) : 0;
+    const format = (text: string) =>
+      text
+        .replace(/{{done}}/g, `${done}`)
+        .replace(/{{total}}/g, `${total}`)
+        .replace(/{{remaining}}/g, `${total - done}`)
+        .replace(/{{percent}}/g, `${percent}`);
     const launcherProgressText = currentConfig.launcherProgressText ?? "{{done}}/{{total}}";
 
     dom.progressText.textContent = format(currentConfig.progressText || "{{done}} of {{total}}");
-    dom.progressFill.style.width = `${total ? (done / total) * 100 : 0}%`;
+    dom.progressFill.style.width = `${percent}%`;
+    // For progress designs drawn in CSS, such as a ring around the count.
+    dom.root.style.setProperty("--driver-checklist-progress", `${percent}%`);
     dom.launcherCount.textContent = format(launcherProgressText);
     dom.launcherCount.hidden = !launcherProgressText;
     dom.root.classList.toggle("driver-checklist-complete", isAllDone());
 
+    renderTexts();
     syncLauncherTitle();
+  }
+
+  // Tracks the last string we wrote so comparison works even when the browser
+  // rewrites the markup (e.g. self-closing tags, entity encoding).
+  const lastHTML = new WeakMap<HTMLElement, string>();
+
+  function setHTML(element: HTMLElement, html: string) {
+    if (lastHTML.get(element) !== html) {
+      lastHTML.set(element, html);
+      element.innerHTML = html;
+    }
+  }
+
+  function renderTexts() {
+    if (!dom) {
+      return;
+    }
+
+    const isComplete = isAllDone();
+    const title = (isComplete && currentConfig.completeTitle) || currentConfig.title || "Get started";
+    const description = (isComplete ? currentConfig.completeDescription : undefined) ?? currentConfig.description ?? "";
+    const launcherText = (isComplete && currentConfig.completeLauncherText) || currentConfig.launcherText || title;
+
+    setHTML(dom.title, title);
+    setHTML(dom.description, description);
+    setHTML(dom.launcherText, launcherText);
+
+    dom.description.hidden = !description;
+    dom.panel.setAttribute("aria-label", dom.title.textContent || "");
   }
 
   // A label too long for the launcher is cut off with an ellipsis by CSS;
@@ -303,23 +355,28 @@ export function checklist(config: ChecklistConfig): Checklist {
       currentConfig.className || ""
     }`.trim();
 
+    const { x, y } = currentConfig.offset || {};
+    if (x !== undefined) {
+      root.style.setProperty("--driver-checklist-offset-x", `${x}px`);
+    }
+    if (y !== undefined) {
+      root.style.setProperty("--driver-checklist-offset-y", `${y}px`);
+    }
+
     const panelId = `driver-checklist-${currentConfig.id}`;
-    const title = currentConfig.title || "Get started";
 
     const panel = document.createElement("div");
     panel.className = "driver-checklist-panel";
     panel.id = panelId;
     panel.hidden = true;
     panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-label", title);
 
     const header = document.createElement("div");
     header.className = "driver-checklist-header";
 
-    const titleEl = document.createElement("div");
-    titleEl.className = "driver-checklist-title";
-    titleEl.innerHTML = title;
-    header.appendChild(titleEl);
+    const title = document.createElement("div");
+    title.className = "driver-checklist-title";
+    header.appendChild(title);
 
     const closeButton = document.createElement("button");
     closeButton.type = "button";
@@ -332,12 +389,9 @@ export function checklist(config: ChecklistConfig): Checklist {
     });
     header.appendChild(closeButton);
 
-    if (currentConfig.description) {
-      const description = document.createElement("div");
-      description.className = "driver-checklist-description";
-      description.innerHTML = currentConfig.description;
-      header.appendChild(description);
-    }
+    const description = document.createElement("div");
+    description.className = "driver-checklist-description";
+    header.appendChild(description);
 
     const progress = document.createElement("div");
     progress.className = "driver-checklist-progress";
@@ -372,7 +426,6 @@ export function checklist(config: ChecklistConfig): Checklist {
 
     const launcherText = document.createElement("span");
     launcherText.className = "driver-checklist-launcher-text";
-    launcherText.innerHTML = currentConfig.launcherText || title;
 
     const launcherCount = document.createElement("span");
     launcherCount.className = "driver-checklist-launcher-count";
@@ -383,7 +436,7 @@ export function checklist(config: ChecklistConfig): Checklist {
     root.appendChild(panel);
     root.appendChild(launcher);
 
-    return { root, panel, progressText, progressFill, list, launcher, launcherText, launcherCount };
+    return { root, panel, title, description, progressText, progressFill, list, launcher, launcherText, launcherCount };
   }
 
   function bindListeners() {
@@ -460,8 +513,17 @@ export function checklist(config: ChecklistConfig): Checklist {
     refresh();
 
     // Another tour took over the screen; reopening would cover it.
-    if (reason !== "replaced") {
-      open();
+    if (reason === "replaced") {
+      return;
+    }
+
+    open();
+
+    // Focus was on the tour, which is gone; hand it back to the item so
+    // keyboard users continue where they left off.
+    if (dom && (!document.activeElement || document.activeElement === document.body)) {
+      const entry = dom.list.children[items().indexOf(item)];
+      entry?.querySelector<HTMLElement>(".driver-checklist-item-trigger")?.focus();
     }
   }
 

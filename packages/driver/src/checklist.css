@@ -2,13 +2,17 @@
    styles, so pages with a checklist import driver.css as well. */
 
 .driver-checklist {
+  /* Distance from the screen edges, set with the offset option or these
+     variables; phones get a tighter default below. */
+  --driver-checklist-x: var(--driver-checklist-offset-x, 20px);
+  --driver-checklist-y: var(--driver-checklist-offset-y, 20px);
+
   position: fixed;
-  bottom: 20px;
   z-index: 999999990;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 2 * var(--driver-checklist-x));
   box-sizing: border-box;
   font-family: var(
     --driver-popover-font-family,
@@ -29,14 +33,46 @@
   box-sizing: border-box;
 }
 
-.driver-checklist-bottom-right {
-  right: 20px;
+/* Clear of the notch and the home bar on phones that have them. */
+.driver-checklist-bottom-right,
+.driver-checklist-bottom-left {
+  bottom: calc(var(--driver-checklist-y) + env(safe-area-inset-bottom, 0px));
+}
+
+.driver-checklist-top-right,
+.driver-checklist-top-left {
+  top: calc(var(--driver-checklist-y) + env(safe-area-inset-top, 0px));
+  /* The panel opens below the launcher instead of above it. */
+  flex-direction: column-reverse;
+}
+
+.driver-checklist-bottom-right,
+.driver-checklist-top-right {
+  right: calc(var(--driver-checklist-x) + env(safe-area-inset-right, 0px));
   align-items: flex-end;
 }
 
-.driver-checklist-bottom-left {
-  left: 20px;
+.driver-checklist-bottom-left,
+.driver-checklist-top-left {
+  left: calc(var(--driver-checklist-x) + env(safe-area-inset-left, 0px));
   align-items: flex-start;
+}
+
+/* On phones the panel spans the screen with even margins, and the launcher
+   stays in its corner. */
+@media (max-width: 480px) {
+  .driver-checklist {
+    --driver-checklist-x: var(--driver-checklist-offset-x, 12px);
+    --driver-checklist-y: var(--driver-checklist-offset-y, 12px);
+
+    left: calc(var(--driver-checklist-x) + env(safe-area-inset-left, 0px));
+    right: calc(var(--driver-checklist-x) + env(safe-area-inset-right, 0px));
+    max-width: none;
+  }
+
+  .driver-checklist .driver-checklist-panel {
+    width: 100%;
+  }
 }
 
 /* The tour takes over the screen; the checklist waits until it ends. */
@@ -84,7 +120,10 @@
 .driver-checklist-panel {
   width: 320px;
   max-width: 100%;
-  max-height: min(520px, calc(100vh - 100px));
+  /* Leaves room for the launcher and the gaps; dvh follows the visible
+     area as mobile browser toolbars show and hide. */
+  max-height: min(520px, calc(100vh - 2 * var(--driver-checklist-y) - 60px));
+  max-height: min(520px, calc(100dvh - 2 * var(--driver-checklist-y) - 60px));
   overflow-y: auto;
   border-radius: 10px;
   background-color: #fff;
@@ -94,6 +133,7 @@
 }
 
 .driver-checklist-panel[hidden],
+.driver-checklist-description[hidden],
 .driver-checklist-launcher-count[hidden] {
   display: none;
 }
@@ -102,6 +142,19 @@
   from {
     opacity: 0;
     transform: translateY(6px);
+  }
+}
+
+/* Below the launcher in the top corners, so it slides down instead. */
+.driver-checklist-top-right .driver-checklist-panel,
+.driver-checklist-top-left .driver-checklist-panel {
+  animation-name: driver-checklist-in-down;
+}
+
+@keyframes driver-checklist-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }
 
@@ -193,7 +246,11 @@
   border-radius: 6px;
 }
 
-.driver-checklist-item:has(button.driver-checklist-item-trigger:hover, a.driver-checklist-item-trigger:hover) {
+.driver-checklist-item:has(
+  button.driver-checklist-item-trigger:hover,
+  a.driver-checklist-item-trigger:hover,
+  button.driver-checklist-check + div.driver-checklist-item-trigger:hover
+) {
   background-color: #f7f7f7;
 }
 
@@ -211,7 +268,8 @@
 }
 
 button.driver-checklist-item-trigger,
-a.driver-checklist-item-trigger {
+a.driver-checklist-item-trigger,
+button.driver-checklist-check + div.driver-checklist-item-trigger {
   cursor: pointer;
 }
 
@@ -238,6 +296,13 @@ button.driver-checklist-check,
 .driver-checklist-item:has(button.driver-checklist-item-trigger, a.driver-checklist-item-trigger)
   .driver-checklist-check {
   cursor: pointer;
+}
+
+/* A bigger tap target than the 16px circle, for fingers. */
+button.driver-checklist-check::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
 }
 
 button.driver-checklist-check:hover {

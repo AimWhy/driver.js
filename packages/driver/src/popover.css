@@ -57,8 +57,10 @@
   transition-duration: 200ms;
 }
 
+/* focus-visible, not focus: the popover focuses the close button when it
+   opens, which would otherwise darken it for mouse users too. */
 .driver-popover-close-btn:hover,
-.driver-popover-close-btn:focus {
+.driver-popover-close-btn:focus-visible {
   color: #2d2d2d;
 }
 

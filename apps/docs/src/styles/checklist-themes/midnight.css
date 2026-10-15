@@ -1,0 +1,63 @@
+.driver-checklist.checklist-midnight {
+  --driver-checklist-color: #a78bfa;
+  color: #f3f4f6;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-launcher {
+  border-color: #374151;
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-launcher:hover {
+  background-color: #1f2937;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-launcher-count {
+  color: #a78bfa;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-panel {
+  border-color: #1f2937;
+  background-color: #111827;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-description,
+.driver-checklist.checklist-midnight .driver-checklist-progress-text,
+.driver-checklist.checklist-midnight .driver-checklist-item-description {
+  color: #9ca3af;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-close-btn {
+  color: #6b7280;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-close-btn:hover {
+  color: #f9fafb;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-progress-bar {
+  background-color: #1f2937;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-check {
+  border-color: #4b5563;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-item-done .driver-checklist-check {
+  border-color: #a78bfa;
+}
+
+.driver-checklist.checklist-midnight .driver-checklist-item-done .driver-checklist-item-title {
+  color: #6b7280;
+}
+
+.driver-checklist.checklist-midnight
+  .driver-checklist-item:has(
+    button.driver-checklist-item-trigger:hover,
+    a.driver-checklist-item-trigger:hover,
+    button.driver-checklist-check + div.driver-checklist-item-trigger:hover
+  ) {
+  background-color: #1f2937;
+}

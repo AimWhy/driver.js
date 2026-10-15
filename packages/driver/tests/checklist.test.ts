@@ -106,6 +106,85 @@ describe("checklist rendering", () => {
     expect(launcher()?.hasAttribute("title")).toBe(false);
   });
 
+  it("fills in {{percent}} and {{remaining}}, and exposes the progress to CSS", () => {
+    const list = createChecklist({
+      progressText: "{{percent}}% complete",
+      launcherProgressText: "{{remaining}} left",
+    });
+    list.show();
+    list.complete("tour");
+
+    expect(progressText()).toBe("33% complete");
+    expect(launcherCount()).toBe("2 left");
+    expect(root()?.style.getPropertyValue("--driver-checklist-progress")).toBe("33%");
+  });
+
+  it("replaces every occurrence of a placeholder", () => {
+    createChecklist({ progressText: "{{done}}/{{total}}, {{done}} done" }).show();
+
+    expect(progressText()).toBe("0/3, 0 done");
+  });
+
+  it("switches to the complete texts once every item is done, and back when one is unticked", () => {
+    const list = createChecklist({
+      title: "Get started",
+      description: "Three steps.",
+      launcherText: "Setup",
+      completeTitle: "You're all set! 🎉",
+      completeDescription: "Thanks for getting started.",
+      completeLauncherText: "All done",
+    });
+    list.show();
+
+    const title = () => document.querySelector(".driver-checklist-title")?.textContent;
+    const description = () => document.querySelector<HTMLElement>(".driver-checklist-description");
+    const launcherText = () => document.querySelector(".driver-checklist-launcher-text")?.textContent;
+
+    ["tour", "docs", "invite"].forEach(id => list.complete(id));
+    expect(title()).toBe("You're all set! 🎉");
+    expect(description()?.textContent).toBe("Thanks for getting started.");
+    expect(launcherText()).toBe("All done");
+    expect(panel()?.getAttribute("aria-label")).toBe("You're all set! 🎉");
+
+    list.uncomplete("docs");
+    expect(title()).toBe("Get started");
+    expect(description()?.textContent).toBe("Three steps.");
+    expect(launcherText()).toBe("Setup");
+  });
+
+  it("keeps the regular texts when no complete texts are set, and hides an empty description", () => {
+    createChecklist({ title: "Get started", completed: ["tour", "docs", "invite"] }).show();
+
+    expect(document.querySelector(".driver-checklist-title")?.textContent).toBe("Get started");
+    expect(document.querySelector(".driver-checklist-launcher-text")?.textContent).toBe("Get started");
+    expect(document.querySelector<HTMLElement>(".driver-checklist-description")?.hidden).toBe(true);
+  });
+
+  it("can clear the description once done with an empty completeDescription", () => {
+    createChecklist({
+      description: "Three steps.",
+      completeDescription: "",
+      completed: ["tour", "docs", "invite"],
+    }).show();
+
+    expect(document.querySelector<HTMLElement>(".driver-checklist-description")?.hidden).toBe(true);
+  });
+
+  it("supports the top corners and a custom offset", () => {
+    createChecklist({ position: "top-left", offset: { x: 32, y: 90 } }).show();
+
+    expect(root()?.classList.contains("driver-checklist-top-left")).toBe(true);
+    expect(root()?.style.getPropertyValue("--driver-checklist-offset-x")).toBe("32px");
+    expect(root()?.style.getPropertyValue("--driver-checklist-offset-y")).toBe("90px");
+  });
+
+  it("leaves the offset to the stylesheet when it is not set", () => {
+    createChecklist({ offset: { y: 0 } }).show();
+
+    expect(root()?.style.getPropertyValue("--driver-checklist-offset-x")).toBe("");
+    expect(root()?.style.getPropertyValue("--driver-checklist-offset-y")).toBe("0px");
+  });
+
   it("marks items passed in through completed without firing completion hooks", () => {
     const onItemComplete = vi.fn();
     const onComplete = vi.fn();
@@ -116,6 +195,16 @@ describe("checklist rendering", () => {
     expect(root()?.classList.contains("driver-checklist-complete")).toBe(true);
     expect(onItemComplete).not.toHaveBeenCalled();
     expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it("does not replace the description DOM when the HTML string is unchanged", () => {
+    const list = createChecklist({ description: '<img src="a.gif" />' });
+    list.show();
+
+    const img = document.querySelector<HTMLElement>(".driver-checklist-description img");
+    list.complete("tour");
+
+    expect(document.querySelector(".driver-checklist-description img")).toBe(img);
   });
 
   it("removes everything on hide()", () => {
@@ -261,6 +350,20 @@ describe("tours", () => {
     expect(document.body.classList.contains("driver-active")).toBe(false);
     expect(isDone("tour")).toBe(true);
     expect(list.isOpen()).toBe(true);
+  });
+
+  it("hands focus back to the item once its tour ends", async () => {
+    const list = createChecklist();
+    list.show();
+    list.open();
+
+    trigger("tour")?.focus();
+    trigger("tour")?.click();
+    // Browsers drop focus from the hidden panel; jsdom keeps it.
+    trigger("tour")?.blur();
+    await finishTour();
+
+    expect(document.activeElement).toBe(trigger("tour"));
   });
 
   it("leaves the item open when the tour is closed early, and reopens the panel", async () => {
@@ -424,6 +527,23 @@ describe("manual completion", () => {
     expect(isDone("tour")).toBe(false);
     expect(onProgress).toHaveBeenLastCalledWith({ completed: [], done: 0, total: 3 });
     expect(onEvent.mock.calls.map(([event]) => event.type)).toContain("item_uncompleted");
+  });
+
+  it("ticks and unticks a row with nothing to start when its text is clicked", () => {
+    createChecklist({ allowManualComplete: true, items: [{ id: "plain", title: "Plain" }] }).show();
+
+    trigger("plain")?.click();
+    expect(isDone("plain")).toBe(true);
+
+    trigger("plain")?.click();
+    expect(isDone("plain")).toBe(false);
+  });
+
+  it("leaves rows with nothing to start alone without allowManualComplete", () => {
+    createChecklist({ items: [{ id: "plain", title: "Plain" }] }).show();
+
+    trigger("plain")?.click();
+    expect(isDone("plain")).toBe(false);
   });
 
   it("can be turned on or off per item", () => {
